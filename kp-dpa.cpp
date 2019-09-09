@@ -1,4 +1,3 @@
-#include<omp.h>
 #include<iostream>
 #include<stdlib.h>
 #include<stdio.h>
@@ -12,7 +11,7 @@ class KnapSolver
 	public:
         void read(char *file_name);
         void solve();
-	void output();
+		void output();
 
 };
 void KnapSolver::read(char *file_name)
@@ -49,11 +48,8 @@ void KnapSolver::solve()
 	if(a == NULL){cerr<<"Error : Your size is too much.\n";exit(1);}
 	x=(int *)malloc(obj*sizeof(int));
 	if(x == NULL){cerr<<"Error : Your size is too much.\n";exit(1);}
-///	#pragma omp parallel private(i,j)
-	//{
 		for(j=0;j<obj;j++)
-		{ 
-			//#pragma omp parallel for 
+		{  
 			for(i=0;i<max_w+1;i++)
 			{
 				if(i<w[j])
@@ -69,7 +65,7 @@ void KnapSolver::solve()
 					  a[i*obj+j]=p[j];
 					else
 					{
-	                                  int k=i-w[j];
+	                  int k=i-w[j];
 					  if(a[i*obj+j-1]>(a[k*obj+j-1]+p[j]))
 					    a[i*obj+j]=a[i*obj+j-1];
 					  else 
@@ -78,9 +74,7 @@ void KnapSolver::solve()
 				
 				}
 			}
-//			#pragma omp barrier
 		}
-	//}
 	int k=max_w;
 	for(int i=obj-1;i>=0;i--)
 	{
@@ -127,18 +121,11 @@ int main(int argc, char* argv[])
 	double start=0,end=0;
 	if(argc >= 2) {
 	  str = argv[1];
-	  /*if(argc == 3) {
-	    nt = atoi(argv[2]);
-	  }*/
 	} else {
 	  fprintf(stderr, "usage: %s <input_file>\n", argv[0]);
 	  exit(-1);
 	}
-	//omp_set_num_threads(8);
-	//start = omp_get_wtime();
 	kp.read(str);
 	kp.solve();
 	kp.output();
-	//end = omp_get_wtime();
-	//printf("\nRuntime = %f seconds.\n\n",end-start);
 }
