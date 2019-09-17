@@ -80,10 +80,10 @@ void KnapSolver::solve()
 				}
 			}
 		}
-		MPI_Send(a, (max_w+1)*obj*sizeof(int), MPI_INT, 1, 0, MPI_COMM_WORLD);
+		MPI_Send(a, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
 	}
 	if (rank == 1){
-		MPI_Recv(a, (max_w+1)*obj*sizeof(int), MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		MPI_Recv(a, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 		for(i=0;i<obj;i++)
 		{  
 			for(j=((max_w+1)/size)+1;j<max_w+1/size;j++)
