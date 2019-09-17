@@ -4,6 +4,7 @@
 #include<math.h>
 #include<fstream>
 #include<iomanip>
+#include<mpi.h>
 using namespace std;
 class KnapSolver
 {
@@ -43,14 +44,18 @@ void KnapSolver::read(char *file_name)
 }
 void KnapSolver::solve()
 {
-	int i,j,chunk=10;
+	int i,j,chunk=10, size, rank;
 	a=(int *)malloc((max_w+1)*obj*sizeof(int));
 	if(a == NULL){cerr<<"Error : Your size is too much.\n";exit(1);}
 	x=(int *)malloc(obj*sizeof(int));
 	if(x == NULL){cerr<<"Error : Your size is too much.\n";exit(1);}
+	MPI_Init(NULL, NULL); //initialize MPI operations
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank); //get the rank
+    MPI_Comm_size(MPI_COMM_WORLD, &size); //get number of processes
+    if (rank == 0){
 		for(i=0;i<obj;i++)
 		{  
-			for(j=0;j<max_w+1;j++)
+			for(j=0;j<max_w+1/size;j++)
 			{
 				if(j<w[i])
 				{
@@ -75,6 +80,39 @@ void KnapSolver::solve()
 				}
 			}
 		}
+		MPI_Send(a, (max_w+1)*obj*sizeof(int), MPI_INT, 1, 0, MPI_COMM_WORLD);
+	}
+	if (rank == 1){
+		MPI_Recv(a, (max_w+1)*obj*sizeof(int), MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		for(i=0;i<obj;i++)
+		{  
+			for(j=((max_w+1)/size)+1;j<max_w+1/size;j++)
+			{
+				if(j<w[i])
+				{
+					if(j==0 || i == 0)
+					  a[j*obj+i]=0;
+					else 
+					  a[j*obj+i]=a[j*obj+i-1];
+				}
+				if(j>=w[i])
+				{
+					if(i == 0)
+					  a[j*obj+i]=p[i];
+					else
+					{
+	                  int k=j-w[i];
+					  if(a[j*obj+i-1]>(a[k*obj+i-1]+p[i]))
+					    a[j*obj+i]=a[j*obj+i-1];
+					  else 
+					    a[j*obj+i]=a[k*obj+i-1]+p[i];
+					}
+				
+				}
+			}
+		}
+	}
+	MPI_Finalize(); //finalize MPI operations
 	int k=max_w;
 	for(int i=obj-1;i>=0;i--)
 	{
