@@ -8,7 +8,7 @@
 using namespace std;
 class KnapSolver
 {
-	int *a,*p,*w,*x,max_w,obj;
+	int *a, *p, *w, *x, send_arr*, recv_arr*, max_w,obj;
 	public:
         void read(char *file_name);
         void solve();
@@ -40,7 +40,7 @@ void KnapSolver::read(char *file_name)
 		  break;
 	}
 	printf("\nTotal number of object is %d.\n\n",obj);
-        printf("The maximum weight is %d.\n\n",max_w);
+    printf("The maximum weight is %d.\n\n",max_w);
 }
 void KnapSolver::solve()
 {
@@ -52,38 +52,48 @@ void KnapSolver::solve()
 	MPI_Init(NULL, NULL); //initialize MPI operations
     MPI_Comm_rank(MPI_COMM_WORLD, &rank); //get the rank
     MPI_Comm_size(MPI_COMM_WORLD, &size); //get number of processes
+    send_arr=(int *)malloc((max_w+1)*sizeof(int));
+	if(send_arr == NULL){cerr<<"Error : Your size is too much.\n";exit(1);}
+	recv_arr=(int *)malloc((max_w+1)*sizeof(int));
+	if(recv_arr == NULL){cerr<<"Error : Your size is too much.\n";exit(1);}
     if (rank == 0){
 		for(i=0;i<obj;i++)
 		{  
-			for(j=0;j<max_w+1/size;j++)
+			for(j=0;j<(max_w+1)/size;j++)
 			{
 				if(j<w[i])
 				{
 					if(j==0 || i == 0)
-					  a[j*obj+i]=0;
+					  send_arr[j]=a[j*obj+i]=0;
 					else 
-					  a[j*obj+i]=a[j*obj+i-1];
+					  send_arr[j]=a[j*obj+i]=a[j*obj+i-1];
 				}
 				if(j>=w[i])
 				{
 					if(i == 0)
-					  a[j*obj+i]=p[i];
+					  send_arr[j]=a[j*obj+i]=p[i];
 					else
 					{
 	                  int k=j-w[i];
 					  if(a[j*obj+i-1]>(a[k*obj+i-1]+p[i]))
-					    a[j*obj+i]=a[j*obj+i-1];
+					    send_arr[j]=a[j*obj+i]=a[j*obj+i-1];
 					  else 
-					    a[j*obj+i]=a[k*obj+i-1]+p[i];
+					    send_arr[j]=a[j*obj+i]=a[k*obj+i-1]+p[i];
 					}
 				
 				}
 			}
 		}
-		MPI_Send(a, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
+		MPI_Send(send_arr, (max_w+1)/size, MPI_INT, 1, 1, MPI_COMM_WORLD);
 	}
-	if (rank == 1){
-		MPI_Recv(a, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+	else{
+		MPI_Recv(recv_arr, (max_w+1)/size, MPI_INT, 0, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		cout<<"\n--------------------\n";
+		for(int k; k<(max_w+1)/size; k++){
+			cout<<recv_arr[k]<<",";
+		}
+		cout<<"\n--------------------\n";
+		getch();
 		for(i=0;i<obj;i++)
 		{  
 			for(j=((max_w+1)/size)+1;j<max_w+1/size;j++)
