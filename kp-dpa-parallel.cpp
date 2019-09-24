@@ -5,10 +5,11 @@
 #include<fstream>
 #include<iomanip>
 #include<mpi.h>
+//#include<conio.h>
 using namespace std;
 class KnapSolver
 {
-	int *a, *p, *w, *x, send_arr*, recv_arr*, max_w,obj;
+	int *a, *p, *w, *x, *send_arr, *recv_arr, max_w,obj;
 	public:
         void read(char *file_name);
         void solve();
@@ -86,17 +87,22 @@ void KnapSolver::solve()
 		}
 		MPI_Send(send_arr, (max_w+1)/size, MPI_INT, 1, 1, MPI_COMM_WORLD);
 	}
-	else{
+	if (rank == 1){
 		MPI_Recv(recv_arr, (max_w+1)/size, MPI_INT, 0, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-		cout<<"\n--------------------\n";
-		for(int k; k<(max_w+1)/size; k++){
-			cout<<recv_arr[k]<<",";
-		}
-		cout<<"\n--------------------\n";
-		getch();
+		//for(int k=0; k<(max_w+1)/size; k++)
+		//	a[k*obj+i]=recv_arr[k];
+		//cout<<"\n--------------------\n";
+		//for(int k=0; k<(max_w+1); k++){
+		//	cout<<recv_arr[k]<<",";
+		//}
+		//cout<<"\n--------------------\n";
+		//getchar();
+		//std::cin.get();
+		//getch();
 		for(i=0;i<obj;i++)
-		{  
-			for(j=((max_w+1)/size)+1;j<max_w+1/size;j++)
+		{ 
+			for(int k=0; k<(max_w+1)/size; k++)a[k*obj+i]=recv_arr[k]; 
+			for(j=((max_w+1)/size);j<max_w+1;j++)
 			{
 				if(j<w[i])
 				{
