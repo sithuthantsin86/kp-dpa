@@ -4,104 +4,106 @@
 #include<math.h>
 #include<fstream>
 #include<iomanip>
+#include<time.h>
 using namespace std;
 class KnapSolver
 {
-	int *a,*p,*w,*x,max_w,obj;
-	public:
-        void read(char *file_name);
-        void solve();
-		void output();
+	int* a, * p, * w, * x, max_w, obj;
+public:
+	void read(char* file_name);
+	void solve();
+	void output();
 
 };
-void KnapSolver::read(char *file_name)
+void KnapSolver::read(char* file_name)
 {
 	ifstream g;
-	int t=0;
+	int t = 0;
 	g.open(file_name);
-	if(!g)
+	if (!g)
 	{
-      		cerr << "Error: file could not be opened" << endl;
-      		exit(1);
-        }
+		cerr << "Error: file could not be opened" << endl;
+		exit(1);
+	}
 	g >> obj;
 	g >> max_w;
-	w=(int *)malloc(obj*sizeof(int));
-	if(w == NULL){cerr<<"Error : Your size is too much.\n";exit(1);}
-	p=(int *)malloc(obj*sizeof(int));
-	if(p == NULL){cerr<<"Error : Your size is too much.\n";exit(1);}
-	while(!g.eof())
+	w = (int*)malloc(obj * sizeof(int));
+	if (w == NULL) { cerr << "Error : Your size is too much.\n"; exit(1); }
+	p = (int*)malloc(obj * sizeof(int));
+	if (p == NULL) { cerr << "Error : Your size is too much.\n"; exit(1); }
+	while (!g.eof())
 	{
 		g >> p[t];
 		g >> w[t];
 		t++;
-		if(t > obj)
-		  break;
+		if (t > obj)
+			break;
 	}
-	printf("\nTotal number of object is %d.\n\n",obj);
-        printf("The maximum weight is %d.\n\n",max_w);
+	//printf("\nTotal number of object is %d.\n\n", obj);
+	//printf("The maximum weight is %d.\n\n", max_w);
 }
 void KnapSolver::solve()
 {
-	int i,j,chunk=10;
-	a=(int *)malloc((max_w+1)*obj*sizeof(int));
-	if(a == NULL){cerr<<"Error : Your size is too much.\n";exit(1);}
-	x=(int *)malloc(obj*sizeof(int));
-	if(x == NULL){cerr<<"Error : Your size is too much.\n";exit(1);}
-		for(i=0;i<obj;i++)
-		{  
-			for(j=0;j<max_w+1;j++)
+	int i, j, chunk = 10;
+	a = (int*)malloc((max_w + 1) * obj * sizeof(int));
+	if (a == NULL) { cerr << "Error : Your size is too much.\n"; exit(1); }
+	x = (int*)malloc(obj * sizeof(int));
+	if (x == NULL) { cerr << "Error : Your size is too much.\n"; exit(1); }
+	for (i = 0; i < obj; i++)
+	{
+		for (j = 0; j < max_w + 1; j++)
+		{
+			if (j < w[i])
 			{
-				if(j<w[i])
+				if (j == 0 || i == 0)
+					a[j * obj + i] = 0;
+				else
+					a[j * obj + i] = a[j * obj + i - 1];
+			}
+			if (j >= w[i])
+			{
+				if (i == 0)
+					a[j * obj + i] = p[i];
+				else
 				{
-					if(j==0 || i == 0)
-					  a[j*obj+i]=0;
-					else 
-					  a[j*obj+i]=a[j*obj+i-1];
-				}
-				if(j>=w[i])
-				{
-					if(i == 0)
-					  a[j*obj+i]=p[i];
+					int k = j - w[i];
+					if (a[j * obj + i - 1] > (a[k * obj + i - 1] + p[i]))
+						a[j * obj + i] = a[j * obj + i - 1];
 					else
-					{
-	                  int k=j-w[i];
-					  if(a[j*obj+i-1]>(a[k*obj+i-1]+p[i]))
-					    a[j*obj+i]=a[j*obj+i-1];
-					  else 
-					    a[j*obj+i]=a[k*obj+i-1]+p[i];
-					}
-				
+						a[j * obj + i] = a[k * obj + i - 1] + p[i];
 				}
+
 			}
 		}
-	int k=max_w;
-	for(int i=obj-1;i>=0;i--)
+	}
+	/*int k = max_w;
+	for (int i = obj - 1; i >= 0; i--)
 	{
-		if(i==0){
-		  if(a[k*obj]==0) 
-		    x[i]=0;
-		  else
-		    x[i] = 1;
-		}else if(a[k*obj+i]!=a[k*obj+i-1])
+		if (i == 0) {
+			if (a[k * obj] == 0)
+				x[i] = 0;
+			else
+				x[i] = 1;
+		}
+		else if (a[k * obj + i] != a[k * obj + i - 1])
 		{
-			x[i]=1;k=k-w[i];
+			x[i] = 1; k = k - w[i];
 		}
 		else
-		    x[i]=0;
-	}
+			x[i] = 0;
+	}*/
 }
 void KnapSolver::output()
 {
 #if 0
-        for(int j = 0; j < max_w + 1; j ++) {
-	  for(int i = 0; i < obj; i ++) {
-	    printf("%d ", a[j * obj + i]);
-	  }
-	  printf("\n");
+	for (int j = 0; j < max_w + 1; j++) {
+		for (int i = 0; i < obj; i++) {
+			printf("%d ", a[j * obj + i]);
+		}
+		printf("\n");
 	}
 #endif
-	cout<<"\nThe Answer is = ";
+	//cout << "\nThe Answer is = ";
 	/*for(int i=0;i<max_w+1;i++)
 	{
 		for(int j=0;j<obj;j++)
@@ -110,22 +112,26 @@ void KnapSolver::output()
 		}
 		cout<<endl;
 	}*/
-	for(int i=0;i<obj;i++)cout<<x[i]<<" ";
-	cout<<"\n\nThe maximum value is = "<<a[max_w*obj+obj-1]<<endl;
+	//for (int i = 0; i < obj; i++)cout << x[i] << " ";
+	cout << "\n\nThe maximum value is = " << a[max_w * obj + obj - 1] << endl;
 }
 int main(int argc, char* argv[])
 {
 	KnapSolver kp;
 	char* str = NULL;
 	int nt = 1;
-	double start=0,end=0;
-	if(argc >= 2) {
-	  str = argv[1];
-	} else {
-	  fprintf(stderr, "usage: %s <input_file>\n", argv[0]);
-	  exit(-1);
+	if (argc >= 2) {
+		str = argv[1];
+	}
+	else {
+		fprintf(stderr, "usage: %s <input_file>\n", argv[0]);
+		exit(-1);
 	}
 	kp.read(str);
+	clock_t begin = clock();
 	kp.solve();
-	kp.output();
+	//kp.output();
+	clock_t end = clock();
+	double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+	cout << "\nThe process took " << time_spent << " seconds to run." << std::endl;
 }

@@ -41,6 +41,7 @@ void KnapSolver::read(char* file_name)
 void KnapSolver::solve()
 {
 	int i, j, chunk = 10, size, rank, C1, C2;
+	double start = 0, end = 0;
 	C1 = max_w / 2;
 	C2 = max_w - C1;
 	a = (int*)malloc((max_w + 1) * obj * sizeof(int));
@@ -48,6 +49,7 @@ void KnapSolver::solve()
 	x = (int*)malloc(obj * sizeof(int));
 	if (x == NULL) { cerr << "Error : Your size is too much.\n"; exit(1); }
 	MPI_Init(NULL, NULL); //initialize MPI operations
+	start = MPI_Wtime();
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank); //get the rank
 	MPI_Comm_size(MPI_COMM_WORLD, &size); //get number of processes
 	send_arr = (int*)malloc((max_w + 1) * sizeof(int));
@@ -81,7 +83,7 @@ void KnapSolver::solve()
 
 				}
 			}
-			MPI_Send(send_arr, C1, MPI_INT, 1, 1, MPI_COMM_WORLD);
+			if(i != obj)MPI_Send(send_arr, C1, MPI_INT, 1, 1, MPI_COMM_WORLD);
 		}
 	}
 	if (rank == 1) {
@@ -124,7 +126,7 @@ void KnapSolver::solve()
 				cout << endl;
 			}*/
 		}
-		int k = max_w;
+		/*int k = max_w;
 		for (int i = obj - 1; i >= 0; i--)
 		{
 			if (i == 0) {
@@ -141,18 +143,18 @@ void KnapSolver::solve()
 				x[i] = 0;
 		}
 		cout << "\nThe Answer is = ";
-		for (int i = 0; i < obj; i++)cout << x[i] << " ";
-		cout << "\n\nThe maximum value is = " << a[max_w * obj + obj - 1] << endl<< endl;
+		for (int i = 0; i < obj; i++)cout << x[i] << " ";*/
+		//cout << "\n\nThe maximum value is = " << a[max_w * obj + obj - 1] << endl << endl;
 	}
+	end = MPI_Wtime();
+	if (rank == 1)cout << "\nThe process took " << end - start << " seconds to run." << std::endl;
 	MPI_Finalize(); //finalize MPI operations
-	
 }
 int main(int argc, char* argv[])
 {
 	KnapSolver kp;
 	char* str = NULL;
 	int nt = 1;
-	double start = 0, end = 0;
 	if (argc >= 2) {
 		str = argv[1];
 	}
