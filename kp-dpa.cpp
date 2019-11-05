@@ -8,7 +8,7 @@
 using namespace std;
 class KnapSolver
 {
-	int* a, * p, * w, * x, max_w, obj;
+	int *a, *p, *w, *x, C, N;
 public:
 	void read(char* file_name);
 	void solve();
@@ -18,59 +18,56 @@ public:
 void KnapSolver::read(char* file_name)
 {
 	ifstream g;
-	int t = 0;
+	int count = 0;
 	g.open(file_name);
 	if (!g)
 	{
 		cerr << "Error: file could not be opened" << endl;
 		exit(1);
 	}
-	g >> obj;
-	g >> max_w;
-	w = (int*)malloc(obj * sizeof(int));
+	g >> N;
+	g >> C;
+	w = (int*)malloc(N * sizeof(int));
 	if (w == NULL) { cerr << "Error : Your size is too much.\n"; exit(1); }
-	p = (int*)malloc(obj * sizeof(int));
+	p = (int*)malloc(N * sizeof(int));
 	if (p == NULL) { cerr << "Error : Your size is too much.\n"; exit(1); }
 	while (!g.eof())
 	{
-		g >> p[t];
-		g >> w[t];
-		t++;
-		if (t > obj)
-			break;
+		g >> p[count];
+		g >> w[count];
+		count++;
+		if(count > N)break;
 	}
-	//printf("\nTotal number of object is %d.\n\n", obj);
-	//printf("The maximum weight is %d.\n\n", max_w);
 }
 void KnapSolver::solve()
 {
-	int i, j, chunk = 10;
-	a = (int*)malloc((max_w + 1) * obj * sizeof(int));
+	int i, j;
+	a = (int*)malloc(N * (C + 1) * sizeof(int));
 	if (a == NULL) { cerr << "Error : Your size is too much.\n"; exit(1); }
-	x = (int*)malloc(obj * sizeof(int));
+	x = (int*)malloc(N * sizeof(int));
 	if (x == NULL) { cerr << "Error : Your size is too much.\n"; exit(1); }
-	for (i = 0; i < obj; i++)
+	for (i = 0; i < N; i++)
 	{
-		for (j = 0; j < max_w + 1; j++)
+		for (j = 0; j < C + 1; j++)
 		{
 			if (j < w[i])
 			{
 				if (j == 0 || i == 0)
-					a[j * obj + i] = 0;
+					a[i * (C+1) + j] = 0;
 				else
-					a[j * obj + i] = a[j * obj + i - 1];
+					a[i * (C+1) + j] = a[(i-1) * (C+1) + j];
 			}
 			if (j >= w[i])
 			{
 				if (i == 0)
-					a[j * obj + i] = p[i];
+					a[i * (C+1) + j] = p[i];
 				else
 				{
 					int k = j - w[i];
-					if (a[j * obj + i - 1] > (a[k * obj + i - 1] + p[i]))
-						a[j * obj + i] = a[j * obj + i - 1];
+					if (a[(i-1) * (C+1) + j] > (a[(i-1) * (C+1) + k] + p[i]))
+						a[i * (C+1) + j] = a[(i-1) * (C+1) + j];
 					else
-						a[j * obj + i] = a[k * obj + i - 1] + p[i];
+						a[i * (C+1) + j] = a[(i-1) * (C+1) + k] + p[i];
 				}
 
 			}
@@ -113,7 +110,16 @@ void KnapSolver::output()
 		cout<<endl;
 	}*/
 	//for (int i = 0; i < obj; i++)cout << x[i] << " ";
-	cout << "\n\nThe maximum value is = " << a[max_w * obj + obj - 1] << endl;
+	/*cout<<"\n\nThe table is;\n\n";
+	for (int i = 0; i < N; i++)
+	{
+		for (int j = 0; j < C + 1; j++)
+		{
+			cout<<a[i * (C+1) + j]<<"\t,";
+		}
+		cout<<endl;
+	}*/	
+	//cout << "\n\nThe maximum value is = " << a[C * N + N - 1] << endl;
 }
 int main(int argc, char* argv[])
 {
@@ -130,8 +136,8 @@ int main(int argc, char* argv[])
 	kp.read(str);
 	clock_t begin = clock();
 	kp.solve();
-	//kp.output();
+	kp.output();
 	clock_t end = clock();
 	double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-	cout << "\nThe process took " << time_spent << " seconds to run." << std::endl;
+	cout << "\nThe process took " << time_spent << " seconds to run.\n" << std::endl;
 }
