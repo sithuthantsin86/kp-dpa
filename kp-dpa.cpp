@@ -5,6 +5,7 @@
 #include<fstream>
 #include<iomanip>
 #include<time.h>
+#include<new>
 using namespace std;
 class KnapSolver
 {
@@ -27,10 +28,10 @@ void KnapSolver::read(char* file_name)
 	}
 	g >> N;
 	g >> C;
-	w = (int*)malloc(N * sizeof(int));
-	if (w == NULL) { cerr << "Error : Your size is too much.\n"; exit(1); }
-	p = (int*)malloc(N * sizeof(int));
-	if (p == NULL) { cerr << "Error : Your size is too much.\n"; exit(1); }
+	p = new (nothrow) int [N];
+	if (p == nullptr)cout << "Error: memory could not be allocated for p.";
+	w = new (nothrow) int [N];
+	if (w == nullptr)cout << "Error: memory could not be allocated for w.";
 	while (!g.eof())
 	{
 		g >> p[count];
@@ -42,10 +43,10 @@ void KnapSolver::read(char* file_name)
 void KnapSolver::solve()
 {
 	int i, j;
-	a = (int*)malloc(N * (C + 1) * sizeof(int));
-	if (a == NULL) { cerr << "Error : Your size is too much.\n"; exit(1); }
-	x = (int*)malloc(N * sizeof(int));
-	if (x == NULL) { cerr << "Error : Your size is too much.\n"; exit(1); }
+	a = new (nothrow) int [N * (C+1)];
+	if (a == nullptr)cout << "Error: memory could not be allocated for a.";
+	x = new (nothrow) int [N];
+	if (x == nullptr)cout << "Error: memory could not be allocated for x.";
 	for (i = 0; i < N; i++)
 	{
 		for (j = 0; j < C + 1; j++)
@@ -89,6 +90,7 @@ void KnapSolver::solve()
 		else
 			x[i] = 0;
 	}*/
+	delete[] p;
 }
 void KnapSolver::output()
 {
@@ -118,8 +120,9 @@ void KnapSolver::output()
 			cout<<a[i * (C+1) + j]<<"\t,";
 		}
 		cout<<endl;
-	}*/	
+	}*/
 	//cout << "\n\nThe maximum value is = " << a[C * N + N - 1] << endl;
+	delete[] a;
 }
 int main(int argc, char* argv[])
 {
