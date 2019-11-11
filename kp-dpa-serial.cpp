@@ -13,7 +13,6 @@ class KnapSolver
 public:
 	void read(char* file_name);
 	void solve();
-	void output();
 
 };
 void KnapSolver::read(char* file_name)
@@ -74,6 +73,7 @@ void KnapSolver::solve()
 			}
 		}
 	}
+	//cout << "The maximum value is = " << a[C * N + N - 1] << endl;
 	/*int k = max_w;
 	for (int i = obj - 1; i >= 0; i--)
 	{
@@ -91,37 +91,6 @@ void KnapSolver::solve()
 			x[i] = 0;
 	}*/
 	delete[] p;
-}
-void KnapSolver::output()
-{
-#if 0
-	for (int j = 0; j < max_w + 1; j++) {
-		for (int i = 0; i < obj; i++) {
-			printf("%d ", a[j * obj + i]);
-		}
-		printf("\n");
-	}
-#endif
-	//cout << "\nThe Answer is = ";
-	/*for(int i=0;i<max_w+1;i++)
-	{
-		for(int j=0;j<obj;j++)
-		{
-			cout<<setw(4)<<a[i*obj+j]<<" ";
-		}
-		cout<<endl;
-	}*/
-	//for (int i = 0; i < obj; i++)cout << x[i] << " ";
-	/*cout<<"\n\nThe table is;\n\n";
-	for (int i = 0; i < N; i++)
-	{
-		for (int j = 0; j < C + 1; j++)
-		{
-			cout<<a[i * (C+1) + j]<<"\t,";
-		}
-		cout<<endl;
-	}*/
-	//cout << "\n\nThe maximum value is = " << a[C * N + N - 1] << endl;
 	delete[] a;
 }
 int main(int argc, char* argv[])
@@ -139,8 +108,8 @@ int main(int argc, char* argv[])
 	kp.read(str);
 	clock_t begin = clock();
 	kp.solve();
-	kp.output();
 	clock_t end = clock();
 	double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-	cout << "\nThe process took " << time_spent << " seconds to run.\n" << std::endl;
+	//cout << "The process took " << time_spent << " seconds to run.\n";
+	cout << time_spent << "\t";
 }

@@ -115,7 +115,7 @@ void KnapSolver::solve()
 				}
 			}
 		}
-		cout << "The maximum value is = " << a[C * N + N - 1] << endl;
+		//cout << "The maximum value is = " << a[C * N + N - 1] << endl;
 	}
 	/*int k = max_w;
 	for (int i = obj - 1; i >= 0; i--)
@@ -134,7 +134,8 @@ void KnapSolver::solve()
 			x[i] = 0;
 	}*/
 	end = MPI_Wtime();
-	if (rank == 1)cout << "The process took " << end - start << " seconds to run." << std::endl;
+	//if (rank == 1)cout << "The process took " << end - start << " seconds to run." << std::endl;
+	if (rank == 1)cout << end - start << "\n";
 	MPI_Finalize(); //finalize MPI operations
 	delete[] p;
 	delete[] a;
@@ -152,5 +153,10 @@ int main(int argc, char* argv[])
 		exit(-1);
 	}
 	kp.read(str);
+	//clock_t begin = clock();
 	kp.solve();
+	//clock_t end = clock();
+	//double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+	//cout << "The process took " << time_spent << " seconds to run.\n";
+	//cout << time_spent << "\t";
 }

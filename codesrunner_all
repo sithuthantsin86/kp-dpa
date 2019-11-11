@@ -1,0 +1,148 @@
+#                          #
+# My Program Runner Script #
+#                          #
+clear
+echo "$(tput setaf 1)%%%%%%%%% Starting Script %%%%%%%%%$(tput sgr0)"
+#
+#
+# Folder Creation
+#
+if [ ! -d "RESULTS" ]; then
+mkdir RESULTS
+fi
+#
+#############################################################################################################
+#
+# Old file for Uncorrelated_data_instances will be delete if needed
+#
+if [ -f RESULTS/Uncorrelated_data_instances_Results.txt ]; then
+rm RESULTS/Uncorrelated_data_instances_Results.txt
+fi
+#
+#
+# For solving Uncorrelated_data_instances
+#
+echo -e "Serial\tParallel" >> RESULTS/Uncorrelated_data_instances_Results.txt
+for file in Uncorrelated_data_instances/*
+do
+	./s.out $file >> RESULTS/Uncorrelated_data_instances_Results.txt
+	mpirun -np 2 p.out $file >> RESULTS/Uncorrelated_data_instances_Results.txt
+done
+echo "Uncorrelated_data_instances done"
+#
+#############################################################################################################
+#
+# Old file for Uncorrelated_instances_with_similar_weights will be delete if needed
+#
+if [ -f RESULTS/Uncorrelated_instances_with_similar_weights_Results.txt ]; then
+rm RESULTS/Uncorrelated_instances_with_similar_weights_Results.txt
+fi
+#
+#
+# For solving Uncorrelated_instances_with_similar_weights
+#
+echo -e "Serial\tParallel" >> RESULTS/Uncorrelated_instances_with_similar_weights_Results.txt
+for file in Uncorrelated_instances_with_similar_weights/*
+do
+	./s.out $file >> RESULTS/Uncorrelated_instances_with_similar_weights_Results.txt
+	mpirun -np 2 p.out $file >> RESULTS/Uncorrelated_instances_with_similar_weights_Results.txt
+done
+echo "Uncorrelated_instances_with_similar_weights done"
+#
+#############################################################################################################
+#
+# Old file for Weekly_correlated_instances will be delete if needed
+#
+if [ -f RESULTS/Weekly_correlated_instances_Results.txt ]; then
+rm RESULTS/Weekly_correlated_instances_Results.txt
+fi
+#
+#
+# For solving Weekly_correlated_instances
+#
+echo -e "Serial\tParallel" >> RESULTS/Weekly_correlated_instances_Results.txt
+for file in Weekly_correlated_instances/*
+do
+	./s.out $file >> RESULTS/Weekly_correlated_instances_Results.txt
+	mpirun -np 2 p.out $file >> RESULTS/Weekly_correlated_instances_Results.txt
+done
+echo "Weekly_correlated_instances done"
+#
+#############################################################################################################
+#
+# Old file for Almost_strongly_correlated_instances will be delete if needed
+#
+if [ -f RESULTS/Almost_strongly_correlated_instances_Results.txt ]; then
+rm RESULTS/Almost_strongly_correlated_instances_Results.txt
+fi
+#
+#
+# For solving Almost_strongly_correlated_instances
+#
+echo -e "Serial\tParallel" >> RESULTS/Almost_strongly_correlated_instances_Results.txt
+for file in Almost_strongly_correlated_instances/*
+do
+	./s.out $file >> RESULTS/Almost_strongly_correlated_instances_Results.txt
+	mpirun -np 2 p.out $file >> RESULTS/Almost_strongly_correlated_instances_Results.txt
+done
+echo "Almost_strongly_correlated_instances done"
+#
+#############################################################################################################
+#
+# Old file for Strongly_correlated_instances will be delete if needed
+#
+if [ -f RESULTS/Strongly_correlated_instances_Results.txt ]; then
+rm RESULTS/Strongly_correlated_instances_Results.txt
+fi
+#
+#
+# For solving Strongly_correlated_instances
+#
+echo -e "Serial\tParallel" >> RESULTS/Strongly_correlated_instances_Results.txt
+for file in Strongly_correlated_instances/*
+do
+	./s.out $file >> RESULTS/Strongly_correlated_instances_Results.txt
+	mpirun -np 2 p.out $file >> RESULTS/Strongly_correlated_instances_Results.txt
+done
+echo "Strongly_correlated_instances done"
+#
+#############################################################################################################
+#
+# Old file for Inverse_strongly_correlated_instances will be delete if needed
+#
+if [ -f RESULTS/Inverse_strongly_correlated_instances_Results.txt ]; then
+rm RESULTS/Inverse_strongly_correlated_instances_Results.txt
+fi
+#
+#
+# For solving Inverse_strongly_correlated_instances
+#
+echo -e "Serial\tParallel" >> RESULTS/Inverse_strongly_correlated_instances_Results.txt
+for file in Inverse_strongly_correlated_instances/*
+do
+	./s.out $file >> RESULTS/Inverse_strongly_correlated_instances_Results.txt
+	mpirun -np 2 p.out $file >> RESULTS/Inverse_strongly_correlated_instances_Results.txt
+done
+echo "Inverse_strongly_correlated_instances done"
+#
+#############################################################################################################
+#
+# Old file for Subset_sum_instances will be delete if needed
+#
+if [ -f RESULTS/Subset_sum_instancess_Results.txt ]; then
+rm RESULTS/Subset_sum_instances_Results.txt
+fi
+#
+#
+# For solving Subset_sum_instances
+#
+echo -e "Serial\tParallel" >> RESULTS/Subset_sum_instances_Results.txt
+for file in Subset_sum_instances/*
+do
+	./s.out $file >> RESULTS/Subset_sum_instances_Results.txt
+	mpirun -np 2 p.out $file >> RESULTS/Subset_sum_instances_Results.txt
+done
+echo "Subset_sum_instances done"
+#
+#############################################################################################################
+echo -e "\nEnd.\n"
