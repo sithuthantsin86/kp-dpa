@@ -15,18 +15,23 @@ fi
 #
 # Old file for Uncorrelated_data_instances will be delete if needed
 #
-if [ -f RESULTS/Uncorrelated_data_instances_Results.txt ]; then
-rm RESULTS/Uncorrelated_data_instances_Results.txt
+if [ -f RESULTS/Uncorrelated_data_instances_Results.xls ]; then
+rm RESULTS/Uncorrelated_data_instances_Results.xls
 fi
 #
 #
 # For solving Uncorrelated_data_instances
 #
-echo -e "Serial\tParallel" >> RESULTS/Uncorrelated_data_instances_Results.txt
+echo -e "No.\tSerial\tOld Parallel\tNew Parallel" >> RESULTS/Uncorrelated_data_instances_Results.xls
 for file in Uncorrelated_data_instances/*
 do
-	./s.out $file >> RESULTS/Uncorrelated_data_instances_Results.txt
-	mpirun -np 2 p.out $file >> RESULTS/Uncorrelated_data_instances_Results.txt
+	for i in {1..10..1}
+	do
+		echo -n -e $i "\t" >> RESULTS/Uncorrelated_data_instances_Results.xls
+		./s.out $file >> RESULTS/Uncorrelated_data_instances_Results.xls
+		mpirun -np 2 po.out $file >> RESULTS/Uncorrelated_data_instances_Results.xls
+		mpirun -np 2 pn.out $file >> RESULTS/Uncorrelated_data_instances_Results.xls
+	done
 done
 echo "Uncorrelated_data_instances done"
 #
@@ -34,18 +39,23 @@ echo "Uncorrelated_data_instances done"
 #
 # Old file for Uncorrelated_instances_with_similar_weights will be delete if needed
 #
-if [ -f RESULTS/Uncorrelated_instances_with_similar_weights_Results.txt ]; then
-rm RESULTS/Uncorrelated_instances_with_similar_weights_Results.txt
+if [ -f RESULTS/Uncorrelated_instances_with_similar_weights_Results.xls ]; then
+rm RESULTS/Uncorrelated_instances_with_similar_weights_Results.xls
 fi
 #
 #
 # For solving Uncorrelated_instances_with_similar_weights
 #
-echo -e "Serial\tParallel" >> RESULTS/Uncorrelated_instances_with_similar_weights_Results.txt
+echo -e "No.\tSerial\tOld Parallel\tNew Parallel" >> RESULTS/Uncorrelated_instances_with_similar_weights_Results.xls
 for file in Uncorrelated_instances_with_similar_weights/*
 do
-	./s.out $file >> RESULTS/Uncorrelated_instances_with_similar_weights_Results.txt
-	mpirun -np 2 p.out $file >> RESULTS/Uncorrelated_instances_with_similar_weights_Results.txt
+	for i in {1..10..1}
+	do
+		echo -n -e $i "\t" >> RESULTS/Uncorrelated_instances_with_similar_weights_Results.xls
+		./s.out $file >> RESULTS/Uncorrelated_instances_with_similar_weights_Results.xls
+		mpirun -np 2 po.out $file >> RESULTS/Uncorrelated_instances_with_similar_weights_Results.xls
+		mpirun -np 2 pn.out $file >> RESULTS/Uncorrelated_instances_with_similar_weights_Results.xls
+	done
 done
 echo "Uncorrelated_instances_with_similar_weights done"
 #
@@ -53,18 +63,23 @@ echo "Uncorrelated_instances_with_similar_weights done"
 #
 # Old file for Weekly_correlated_instances will be delete if needed
 #
-if [ -f RESULTS/Weekly_correlated_instances_Results.txt ]; then
-rm RESULTS/Weekly_correlated_instances_Results.txt
+if [ -f RESULTS/Weekly_correlated_instances_Results.xls ]; then
+rm RESULTS/Weekly_correlated_instances_Results.xls
 fi
 #
 #
 # For solving Weekly_correlated_instances
 #
-echo -e "Serial\tParallel" >> RESULTS/Weekly_correlated_instances_Results.txt
+echo -e "No.\tSerial\tOld Parallel\tNew Parallel" >> RESULTS/Weekly_correlated_instances_Results.xls
 for file in Weekly_correlated_instances/*
 do
-	./s.out $file >> RESULTS/Weekly_correlated_instances_Results.txt
-	mpirun -np 2 p.out $file >> RESULTS/Weekly_correlated_instances_Results.txt
+	for i in {1..10..1}
+	do
+		echo -n -e $i "\t" >> RESULTS/Weekly_correlated_instances_Results.xls
+		./s.out $file >> RESULTS/Weekly_correlated_instances_Results.xls
+		mpirun -np 2 po.out $file >> RESULTS/Weekly_correlated_instances_Results.xls
+		mpirun -np 2 pn.out $file >> RESULTS/Weekly_correlated_instances_Results.xls
+	done
 done
 echo "Weekly_correlated_instances done"
 #
@@ -72,18 +87,23 @@ echo "Weekly_correlated_instances done"
 #
 # Old file for Almost_strongly_correlated_instances will be delete if needed
 #
-if [ -f RESULTS/Almost_strongly_correlated_instances_Results.txt ]; then
-rm RESULTS/Almost_strongly_correlated_instances_Results.txt
+if [ -f RESULTS/Almost_strongly_correlated_instances_Results.xls ]; then
+rm RESULTS/Almost_strongly_correlated_instances_Results.xls
 fi
 #
 #
 # For solving Almost_strongly_correlated_instances
 #
-echo -e "Serial\tParallel" >> RESULTS/Almost_strongly_correlated_instances_Results.txt
+echo -e "No.\tSerial\tOld Parallel\tNew Parallel" >> RESULTS/Almost_strongly_correlated_instances_Results.xls
 for file in Almost_strongly_correlated_instances/*
 do
-	./s.out $file >> RESULTS/Almost_strongly_correlated_instances_Results.txt
-	mpirun -np 2 p.out $file >> RESULTS/Almost_strongly_correlated_instances_Results.txt
+	for i in {1..10..1}
+	do
+		echo -n -e $i "\t" >> RESULTS/Almost_strongly_correlated_instances_Results.xls
+		./s.out $file >> RESULTS/Almost_strongly_correlated_instances_Results.xls
+		mpirun -np 2 po.out $file >> RESULTS/Almost_strongly_correlated_instances_Results.xls
+		mpirun -np 2 pn.out $file >> RESULTS/Almost_strongly_correlated_instances_Results.xls
+	done
 done
 echo "Almost_strongly_correlated_instances done"
 #
@@ -91,18 +111,23 @@ echo "Almost_strongly_correlated_instances done"
 #
 # Old file for Strongly_correlated_instances will be delete if needed
 #
-if [ -f RESULTS/Strongly_correlated_instances_Results.txt ]; then
-rm RESULTS/Strongly_correlated_instances_Results.txt
+if [ -f RESULTS/Strongly_correlated_instances_Results.xls ]; then
+rm RESULTS/Strongly_correlated_instances_Results.xls
 fi
 #
 #
 # For solving Strongly_correlated_instances
 #
-echo -e "Serial\tParallel" >> RESULTS/Strongly_correlated_instances_Results.txt
+echo -e "No.\tSerial\tOld Parallel\tNew Parallel" >> RESULTS/Strongly_correlated_instances_Results.xls
 for file in Strongly_correlated_instances/*
 do
-	./s.out $file >> RESULTS/Strongly_correlated_instances_Results.txt
-	mpirun -np 2 p.out $file >> RESULTS/Strongly_correlated_instances_Results.txt
+	for i in {1..10..1}
+	do
+		echo -n -e $i "\t" >> RESULTS/Strongly_correlated_instances_Results.xls
+		./s.out $file >> RESULTS/Strongly_correlated_instances_Results.xls
+		mpirun -np 2 po.out $file >> RESULTS/Strongly_correlated_instances_Results.xls
+		mpirun -np 2 pn.out $file >> RESULTS/Strongly_correlated_instances_Results.xls
+	done
 done
 echo "Strongly_correlated_instances done"
 #
@@ -110,18 +135,23 @@ echo "Strongly_correlated_instances done"
 #
 # Old file for Inverse_strongly_correlated_instances will be delete if needed
 #
-if [ -f RESULTS/Inverse_strongly_correlated_instances_Results.txt ]; then
-rm RESULTS/Inverse_strongly_correlated_instances_Results.txt
+if [ -f RESULTS/Inverse_strongly_correlated_instances_Results.xls ]; then
+rm RESULTS/Inverse_strongly_correlated_instances_Results.xls
 fi
 #
 #
 # For solving Inverse_strongly_correlated_instances
 #
-echo -e "Serial\tParallel" >> RESULTS/Inverse_strongly_correlated_instances_Results.txt
+echo -e "No.\tSerial\tOld Parallel\tNew Parallel" >> RESULTS/Inverse_strongly_correlated_instances_Results.xls
 for file in Inverse_strongly_correlated_instances/*
 do
-	./s.out $file >> RESULTS/Inverse_strongly_correlated_instances_Results.txt
-	mpirun -np 2 p.out $file >> RESULTS/Inverse_strongly_correlated_instances_Results.txt
+	for i in {1..10..1}
+	do
+		echo -n -e $i "\t" >> RESULTS/Inverse_strongly_correlated_instances_Results.xls
+		./s.out $file >> RESULTS/Inverse_strongly_correlated_instances_Results.xls
+		mpirun -np 2 po.out $file >> RESULTS/Inverse_strongly_correlated_instances_Results.xls
+		mpirun -np 2 pn.out $file >> RESULTS/Inverse_strongly_correlated_instances_Results.xls
+	done
 done
 echo "Inverse_strongly_correlated_instances done"
 #
@@ -129,18 +159,23 @@ echo "Inverse_strongly_correlated_instances done"
 #
 # Old file for Subset_sum_instances will be delete if needed
 #
-if [ -f RESULTS/Subset_sum_instancess_Results.txt ]; then
-rm RESULTS/Subset_sum_instances_Results.txt
+if [ -f RESULTS/Subset_sum_instancess_Results.xls ]; then
+rm RESULTS/Subset_sum_instances_Results.xls
 fi
 #
 #
 # For solving Subset_sum_instances
 #
-echo -e "Serial\tParallel" >> RESULTS/Subset_sum_instances_Results.txt
+echo -e "No.\tSerial\tOld Parallel\tNew Parallel" >> RESULTS/Subset_sum_instances_Results.xls
 for file in Subset_sum_instances/*
 do
-	./s.out $file >> RESULTS/Subset_sum_instances_Results.txt
-	mpirun -np 2 p.out $file >> RESULTS/Subset_sum_instances_Results.txt
+	for i in {1..10..1}
+	do
+		echo -n -e $i "\t" >> RESULTS/Subset_sum_instances_Results.xls
+		./s.out $file >> RESULTS/Subset_sum_instances_Results.xls
+		mpirun -np 2 po.out $file >> RESULTS/Subset_sum_instances_Results.xls
+		mpirun -np 2 pn.out $file >> RESULTS/Subset_sum_instances_Results.xls
+	done
 done
 echo "Subset_sum_instances done"
 #
