@@ -139,7 +139,7 @@ void KnapSolver::solve()
 					EndPointOfP1 = i;
 					i=i-1;
 					MPI_Send(&i, 1, MPI_INT, 0, 1, MPI_COMM_WORLD);
-					MPI_Bcast(&x,N,MPI_INT,1,MPI_COMM_WORLD);
+					//MPI_Bcast(&x,N,MPI_INT,1,MPI_COMM_WORLD);
 					break;
 				}
 				k = k - w[i];
