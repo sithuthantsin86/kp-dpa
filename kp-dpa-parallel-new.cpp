@@ -115,30 +115,16 @@ void KnapSolver::solve()
 	end = MPI_Wtime();
 	//if (rank == 1)cout << "The process took " << end - start << " seconds to run." << std::endl;
 	if (rank == 1)cout << end - start << "\n";
-	//MPI_Barrier(MPI_COMM_WORLD);
-	///Back tracking algorithm.
+	MPI_Barrier(MPI_COMM_WORLD);
+	/////Back tracking algorithm./////
 	startBT = MPI_Wtime();
-	int k = C;
+	int k = C, EndPointOfP1 = 0;
 	if(rank == 1)
 	{
-		cout<<"\nThe Matrix from rank 1 is:\n";
-		for (i = 0; i < N; i++)
-		{
-			for (j = 0; j < C+1; j++)
-			{
-				cout<<a[i * (C+1) + j]<<",";
-			}
-			cout<<endl<<endl;
-		}
 		for (int i = N - 1; i >= 0; i--)
 		{
-			if(k-w[i]<P1)
-			{
-				MPI_Send(&i, 1, MPI_INT, 0, 1, MPI_COMM_WORLD);
-				cout<<"\nHappened at i = "<<i<<" and k = "<<k<<".\n";
-				break;
-			}
-			else if (i == 0)
+			
+			if (i == 0)
 			{
 				if (a[i * (C+1) + k] == 0)
 					x[i] = 0;
@@ -148,6 +134,14 @@ void KnapSolver::solve()
 			else if (a[i * (C+1) + k] != a[(i-1) * (C+1) + k])
 			{
 				x[i] = 1;
+				if(k-w[i]<P1)
+				{
+					EndPointOfP1 = i;
+					i=i-1;
+					MPI_Send(&i, 1, MPI_INT, 0, 1, MPI_COMM_WORLD);
+					MPI_Bcast(&x,N,MPI_INT,1,MPI_COMM_WORLD);
+					break;
+				}
 				k = k - w[i];
 			}
 			else
@@ -156,24 +150,13 @@ void KnapSolver::solve()
 	}
 	if(rank == 0)
 	{
-		cout<<"\nThe Matrix is:\n";
-		for (i = 0; i < N; i++)
-		{
-			for (j = 0; j < C+1; j++)
-			{
-				cout<<a[i * (C+1) + j]<<",";
-			}
-			cout<<endl;
-		}
 		int j;
 		MPI_Recv(&j, 1, MPI_INT, 1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-		//cout<<"Getting from rank 1 = "<<j<<" and k = "<<k<<".\n";
+		k=k-w[j+1];
 		for (int i = j; i >= 0; i--)
 		{
 			if(i == 0)
 			{
-				cout<<"\n11111\n";
-				cout<<"Current = ("<<a[i * (C+1) + k]<<")\n";
 				if (a[i * (C+1) + k] == 0)
 					x[i] = 0;
 				else
@@ -183,31 +166,29 @@ void KnapSolver::solve()
 			{
 				if(a[i * (C+1) + k] != a[(i-1) * (C+1) + k])
 				{
-					cout<<"\n22222\n";
-					cout<<"Current = ("<<a[i * (C+1) + k]<<","<<a[(i-1) * (C+1) + k]<<")\n";
 					x[i] = 1;
 					k = k - w[i];
 				}
 				else
 				{
-					cout<<"\n33333\n";
-					cout<<"Current = ("<<a[i * (C+1) + k]<<")\n";
 					x[i] = 0;
 				}
 			}
 		}
+		cout<<"x from P0 = ";
+		for(int i=0; i<=j; i++)cout<<x[i]<<",";
 	}
 	endBT = MPI_Wtime();
-	if(rank==1)
-	{
-		cout<<endl<<"x = ";
-		for(int i=0; i<N; i++)cout<<x[i]<<",";
-		cout<<endl;
+	MPI_Barrier(MPI_COMM_WORLD);
+	if(rank==1)for(int i=EndPointOfP1; i<N; i++){
+		cout<<"x from P1 = ";
+		cout<<x[i]<<",";
 	}
+	cout<<endl;
 	MPI_Finalize(); //finalize MPI operations
-	//delete[] p;
-	//delete[] a;
-	//delete[] x;
+	delete[] p;
+	delete[] a;
+	delete[] x;
 }
 int main(int argc, char* argv[])
 {
