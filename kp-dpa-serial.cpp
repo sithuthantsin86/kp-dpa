@@ -74,22 +74,26 @@ void KnapSolver::solve()
 		}
 	}
 	//cout << "The maximum value is = " << a[C * N + N - 1] << endl;
-	/*int k = max_w;
-	for (int i = obj - 1; i >= 0; i--)
+	int k = C;
+	for (int i = N - 1; i >= 0; i--)
 	{
-		if (i == 0) {
-			if (a[k * obj] == 0)
+		if (i == 0)
+		{
+			if (a[i * (C+1) + k] == 0)
 				x[i] = 0;
 			else
 				x[i] = 1;
 		}
-		else if (a[k * obj + i] != a[k * obj + i - 1])
+		else if (a[i * (C+1) + k] != a[(i-1) * (C+1) + k])
 		{
-			x[i] = 1; k = k - w[i];
+			x[i] = 1;
+			k = k - w[i];
 		}
 		else
 			x[i] = 0;
-	}*/
+	}
+	cout<<endl;
+	for(int i=0; i<N; i++)cout<<"x ="<<x[i]<<",";
 	delete[] p;
 	delete[] a;
 }
