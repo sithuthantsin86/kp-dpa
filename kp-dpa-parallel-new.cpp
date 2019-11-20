@@ -113,8 +113,8 @@ void KnapSolver::solve()
 		//cout << "The maximum value is = " << a[C * N + N - 1] << endl;
 	}
 	end = MPI_Wtime();
-	//if (rank == 1)cout << "The process took " << end - start << " seconds to run." << std::endl;
-	if (rank == 1)cout << end - start << "\n";
+	if (rank == 1)cout << "The process took " << end - start << " seconds to run." << std::endl;
+	//if (rank == 1)cout << end - start << "\n";
 	MPI_Barrier(MPI_COMM_WORLD);
 	/////Back tracking algorithm./////
 	startBT = MPI_Wtime();
