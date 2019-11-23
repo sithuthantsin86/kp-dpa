@@ -13,6 +13,7 @@ class KnapSolver
 public:
 	void read(char* file_name);
 	void solve();
+	void backTrack();
 
 };
 void KnapSolver::read(char* file_name)
@@ -74,6 +75,9 @@ void KnapSolver::solve()
 		}
 	}
 	//cout << "The maximum value is = " << a[C * N + N - 1] << endl;
+}
+void KnapSolver::backTrack()
+{
 	int k = C;
 	for (int i = N - 1; i >= 0; i--)
 	{
@@ -92,10 +96,11 @@ void KnapSolver::solve()
 		else
 			x[i] = 0;
 	}
-	cout<<endl;
-	for(int i=0; i<N; i++)cout<<"x ="<<x[i]<<",";
+	//cout<<endl;
+	//for(int i=0; i<N; i++)cout<<"x ="<<x[i]<<",";
 	delete[] p;
 	delete[] a;
+	delete[] x;
 }
 int main(int argc, char* argv[])
 {
@@ -110,10 +115,17 @@ int main(int argc, char* argv[])
 		exit(-1);
 	}
 	kp.read(str);
+
 	clock_t begin = clock();
 	kp.solve();
 	clock_t end = clock();
 	double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+
+	clock_t beginBT = clock();
+	kp.backTrack();
+	clock_t endBT = clock();
+	double time_spent_BT = (double)(endBT - beginBT) / CLOCKS_PER_SEC;
 	//cout << "The process took " << time_spent << " seconds to run.\n";
 	cout << time_spent << "\t";
+	cout << time_spent_BT << "\n";
 }
