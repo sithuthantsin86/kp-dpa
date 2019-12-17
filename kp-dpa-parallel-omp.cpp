@@ -1,3 +1,4 @@
+#include<omp.h>
 #include<iostream>
 #include<stdlib.h>
 #include<stdio.h>
@@ -49,6 +50,7 @@ void KnapSolver::solve()
 	if (x == nullptr)cout << "Error: memory could not be allocated for x.";
 	for (i = 0; i < N; i++)
 	{
+		#pragma omp parallel for
 		for (j = 0; j < C + 1; j++)
 		{
 			if (j < w[i])
@@ -79,6 +81,7 @@ void KnapSolver::solve()
 void KnapSolver::backTrack()
 {
 	int k = C;
+	#pragma omp parallel for
 	for (int i = N - 1; i >= 0; i--)
 	{
 		if (i == 0)
@@ -107,24 +110,30 @@ int main(int argc, char* argv[])
 	KnapSolver kp;
 	char* str = NULL;
 	int nt = 1;
-	if (argc >= 2) {
-		str = argv[1];
-	}
-	else {
-		fprintf(stderr, "usage: %s <input_file>\n", argv[0]);
-		exit(-1);
+	double start1=0, end1=0, start2=0,end2=0, time_all=0;
+	if(argc >= 3) {
+	  str = argv[1];
+	  if(argc == 3){
+	    nt = atoi(argv[2]);
+	  }
+	} else {
+	  fprintf(stderr, "usage: %s <input_file> <number_of_threads>\n", argv[0]);
+	  exit(-1);
 	}
 	kp.read(str);
-
-	clock_t begin = clock();
+	omp_set_num_threads(nt);
+	//clock_t begin = clock();
+	start1 = omp_get_wtime();
 	kp.solve();
-	clock_t end = clock();
-	double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-
-	clock_t beginBT = clock();
+	end1 = omp_get_wtime();
+	//clock_t end = clock();
+	//double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+	//clock_t beginBT = clock();
+	start2 = omp_get_wtime();
 	kp.backTrack();
-	clock_t endBT = clock();
-	double time_spent_BT = (double)(endBT - beginBT) / CLOCKS_PER_SEC;
+	end2 = omp_get_wtime();
+	//clock_t endBT = clock();
+	//double time_spent_BT = (double)(endBT - beginBT) / CLOCKS_PER_SEC;
 	//cout << "The process took " << time_spent << " seconds to run.\n";
-	cout << time_spent + time_spent_BT << "\t";
+	cout << (end1-start1) + (end2-start2) << "\t";
 }

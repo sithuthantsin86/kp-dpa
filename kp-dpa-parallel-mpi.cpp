@@ -192,10 +192,16 @@ void KnapSolver::solve()
 	if(rank == 1){
 		//cout << "\nThe process took " << end - start << " seconds to run." << std::endl;
 		//MPI_Send(end-start, 1, MPT_D);
-		cout << end - start << "\n";
+		double runtime = end - start;
+		//cout << runtime << "\n";
+		MPI_Send(&runtime, 1, MPI_DOUBLE, 0, 1, MPI_COMM_WORLD);
 	}
 	if(rank == 0){
-		cout << endBT - startBT <<"\t";
+		double runtime_all;
+		MPI_Recv(&runtime_all, 1, MPI_DOUBLE, 1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		//cout << endBT - startBT <<"\t";
+		runtime_all = runtime_all+ (endBT - startBT);
+		cout << runtime_all <<"\n";
 	//	cout << "The backtrack algrithm process took " << end - start << " seconds to run." << std::endl;
 	}
 	//MPI_Barrier(MPI_COMM_WORLD);
