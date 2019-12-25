@@ -41,10 +41,8 @@ void KnapSolver::read(char* file_name)
 }
 void KnapSolver::solve()
 {
-	int i, j, P1, P2, size, rank;
+	int i, j, p1, p2, size, rank, m;
 	double start = 0, end = 0, startBT = 0, endBT = 0;
-	P1 = (C+1) / 2;
-	P2 = (C+1) - P1;
 	a = new (nothrow) int [N * (C+1)];
 	if (a == nullptr)cout << "Error: memory could not be allocated for a.";
 	x = new (nothrow) int [N];
@@ -52,66 +50,57 @@ void KnapSolver::solve()
 	MPI_Init(NULL, NULL); //initialize MPI operations
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank); //get the rank
 	MPI_Comm_size(MPI_COMM_WORLD, &size); //get number of processes
+	m = (c+1)/size;
 	start = MPI_Wtime();
-	if(rank == 0){
-		for (i = 0; i < N; i++)
+	for (i = 0; i < N; i++)
+	{
+		p1 = floor(((m*rank)-w[i])/m);
+		p2 = floor((((m*rank)+(m-1))-w[i])/m);
+		if(p1==p2 && p1<rank)
 		{
-			for (j = 0; j < P1; j++)
+			cnt1=((m*p1)+(m-1))-((m*rank)-w[i])+1;
+			MPI_Recv(&(a[(i-1) * (C+1) + (((m*p1)+(m-1))-cnt1)]), cnt1, MPI_INT, p1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		}
+		if(p2==p1+1)
+		{
+			if(p1<rank && p2<rank)
 			{
-				if (j < w[i])
-				{
-					if (j == 0 || i == 0)
-						a[i * (C+1) + j] = 0;
-					else
-						a[i * (C+1) + j] = a[(i-1) * (C+1) + j];
-				}
-				if (j >= w[i])
-				{
-					if (i == 0)
-						a[i * (C+1) + j] = p[i];
-					else
-					{
-						int k = j - w[i];
-						a[i * (C+1) + j] = max(a[(i-1) * (C+1) + j], a[(i-1) * (C+1) + k] + p[i]);
-					}
-				}
+				cnt1=((m*p1)+(m-1))-((m*rank)-w[i])+1;
+				cnt2=((m*rank)+(m-1))-w[i]-(m*p2)+1;
+				MPI_Recv(&(a[(i-1) * (C+1) + (((m*p1)+(m-1))-cnt1)]), cnt1, MPI_INT, p1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+				MPI_Recv(&(a[(i-1) * (C+1) + (((m*p2)+(m-1))-cnt2)]), cnt2, MPI_INT, p2, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 			}
-			if(i != N-1){
-				MPI_Send(&a[i * (C+1) + (P1-min(w[i+1],P1))], min(w[i+1], P1), MPI_INT, 1, 1, MPI_COMM_WORLD);
+			if(p1<rank && p2==rank)
+			{
+				cnt1=((m*p1)+(m-1))-((m*rank)-w[i])+1;
+				MPI_Recv(&(a[(i-1) * (C+1) + (((m*p1)+(m-1))-cnt1)]), cnt1, MPI_INT, p1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 			}
 		}
-	}
-	if(rank == 1){
-		for(i = 0; i < N; i++)
+		for (j = rank*m; j < (rank*m)+m; j++)
 		{
-			if(i != 0)
+			if (j < w[i])
 			{
-				MPI_Recv(&(a[(i-1) * (C+1) + (P1-min(w[i], P1))]), min(w[i], P1), MPI_INT, 0, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-				/*cout <<"This is rank 1 receiving from rank 0 with i = "<<i<<endl;
-				for (int p = 0; p < P1; p++)cout << a[(i-1) * (C+1) + p] << ",";
-				cout<<endl;*/
+				if (j == 0 || i == 0)
+					a[i * (C+1) + j] = 0;
+				else
+					a[i * (C+1) + j] = a[(i-1) * (C+1) + j];
 			}
-			for(j = P1; j < C + 1; j++){
-				if (j < w[i])
+			if (j >= w[i])
+			{
+				if (i == 0)
+					a[i * (C+1) + j] = p[i];
+				else
 				{
-					if (j == 0 || i == 0)
-						a[i * (C+1) + j] = 0;
-					else
-						a[i * (C+1) + j] = a[(i-1) * (C+1) + j];
-				}
-				if (j >= w[i])
-				{
-					if (i == 0)
-						a[i * (C+1) + j] = p[i];
-					else
-					{
-						int k = j - w[i];
-						a[i * (C+1) + j] = max(a[(i-1) * (C+1) + j], a[(i-1) * (C+1) + k] + p[i]);
-					}
+					int k = j - w[i];
+					a[i * (C+1) + j] = max(a[(i-1) * (C+1) + j], a[(i-1) * (C+1) + k] + p[i]);
 				}
 			}
 		}
-		//cout << "The maximum value is = " << a[C * N + N - 1] << endl;
+		s1 = floor(((m*rank)+w[i+1])/m);
+		s2 = floor((((m*rank)+(m-1))+w[i+1])/m);
+		if(i != N-1){
+			MPI_Send(&a[i * (C+1) + (P1-min(w[i+1],P1))], min(w[i+1], P1), MPI_INT, 1, 1, MPI_COMM_WORLD);
+		}
 	}
 	end = MPI_Wtime();
 	//if (rank == 1){
