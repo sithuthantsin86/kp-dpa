@@ -41,7 +41,7 @@ void KnapSolver::read(char* file_name)
 }
 void KnapSolver::solve()
 {
-	int i, j, p1, p2, size, rank, m;
+	int i, j, ptr1, ptr2, pts1, pts2, size, rank, m, cnt_r1, cnt_r2;
 	double start = 0, end = 0, startBT = 0, endBT = 0;
 	a = new (nothrow) int [N * (C+1)];
 	if (a == nullptr)cout << "Error: memory could not be allocated for a.";
@@ -54,29 +54,19 @@ void KnapSolver::solve()
 	start = MPI_Wtime();
 	for (i = 0; i < N; i++)
 	{
-		p1 = floor(((m*rank)-w[i])/m);
-		p2 = floor((((m*rank)+(m-1))-w[i])/m);
-		if(p1==p2 && p1<rank)
+		ptr1 = floor((double)(m*rank-w[i])/(double)m);
+		ptr2 = floor((double)(m*rank+m-1-w[i])/(double)m);
+		if(ptr1 >= 0 && ptr1 < rank)
 		{
-			cnt1=((m*p1)+(m-1))-((m*rank)-w[i])+1;
-			MPI_Recv(&(a[(i-1) * (C+1) + (((m*p1)+(m-1))-cnt1)]), cnt1, MPI_INT, p1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			cnt_r1=(m*ptr1+m-1)-(m*rank-w[i])+1;
+			MPI_Recv(&a[(i-1) * (C+1) + (m*ptr1+m-1-cnt_r1)], cnt_r1, MPI_INT, ptr1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 		}
-		if(p2==p1+1)
+		if(ptr1 != ptr2 && ptr2 >= 0 && ptr2 < rank)
 		{
-			if(p1<rank && p2<rank)
-			{
-				cnt1=((m*p1)+(m-1))-((m*rank)-w[i])+1;
-				cnt2=((m*rank)+(m-1))-w[i]-(m*p2)+1;
-				MPI_Recv(&(a[(i-1) * (C+1) + (((m*p1)+(m-1))-cnt1)]), cnt1, MPI_INT, p1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-				MPI_Recv(&(a[(i-1) * (C+1) + (((m*p2)+(m-1))-cnt2)]), cnt2, MPI_INT, p2, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-			}
-			if(p1<rank && p2==rank)
-			{
-				cnt1=((m*p1)+(m-1))-((m*rank)-w[i])+1;
-				MPI_Recv(&(a[(i-1) * (C+1) + (((m*p1)+(m-1))-cnt1)]), cnt1, MPI_INT, p1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-			}
+			cnt_r2=(m*rank+m-1)-w[i]-(m*ptr2)+1;
+			MPI_Recv(&a[(i-1) * (C+1) + (m*ptr2+m-1-cnt_r2)], cnt_r2, MPI_INT, ptr2, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 		}
-		for (j = rank*m; j < (rank*m)+m; j++)
+		for (j = rank*m; j < rank*m+m; j++)
 		{
 			if (j < w[i])
 			{
@@ -96,10 +86,17 @@ void KnapSolver::solve()
 				}
 			}
 		}
-		s1 = floor(((m*rank)+w[i+1])/m);
-		s2 = floor((((m*rank)+(m-1))+w[i+1])/m);
-		if(i != N-1){
-			MPI_Send(&a[i * (C+1) + (P1-min(w[i+1],P1))], min(w[i+1], P1), MPI_INT, 1, 1, MPI_COMM_WORLD);
+		pts1 = floor((m*rank+w[i+1])/m);
+		pts2 = floor((m*rank+m-1+w[i+1])/m);
+		if(pts1 <= size && pts1 > rank)
+		{
+			cnt_s1 = (m*rank+m-1)-(m*pts1-w[i+1])+1;
+			MPI_Send(&a[i * (C+1) + (m*pts1+m-1-cnt_s1)], cnt_s1, MPI_INT, pts1, 1, MPI_COMM_WORLD);
+		}
+		if(pts1 != pts2 && pts2 <= size && pts2 > rank)
+		{
+			cnt_s2 = 
+			MPI_Send(&a[i * (C+1) + (m*pts2+m-1-cnt_s2)], cnt_s2, MPI_INT, pts2, 1, MPI_COMM_WORLD);
 		}
 	}
 	end = MPI_Wtime();
