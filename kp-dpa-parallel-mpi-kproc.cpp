@@ -54,18 +54,21 @@ void KnapSolver::solve()
 	start = MPI_Wtime();
 	for (i = 0; i < N; i++)
 	{
-		cout<<"\nHello from rank "<< rank <<".\n";
-		pr1 = floor((double)(m*rank-w[i])/(double)m);
-		pr2 = floor((double)(m*rank+(m-1)-w[i])/(double)m);
-		if(pr1 >= 0 && pr1 < rank)
+		cout<<"\nHello from rank "<< rank <<" of size "<< size <<".\n";
+		if(i != 0)
 		{
-			cnt_r1=(m*pr1+(m-1))-(m*rank-w[i])+1;
-			MPI_Recv(&a[(i-1) * (C+1) + (m*pr1+(m-1)-cnt_r1+1)], cnt_r1, MPI_INT, pr1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-		}
-		if(pr1 != pr2 && pr2 >= 0 && pr2 < rank)
-		{
-			cnt_r2=(m*rank+(m-1))-w[i]-(m*pr2)+1;
-			MPI_Recv(&a[(i-1) * (C+1) + (m*pr2+(m-1)-cnt_r2)], cnt_r2, MPI_INT, pr2, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			pr1 = floor((double)(m*rank-w[i])/(double)m);
+			pr2 = floor((double)(m*rank+(m-1)-w[i])/(double)m);
+			if(pr1 >= 0 && pr1 < rank)
+			{
+				cnt_r1=(m*pr1+(m-1))-(m*rank-w[i])+1;
+				MPI_Recv(&a[(i-1) * (C+1) + (m*pr1+(m-1)-cnt_r1+1)], cnt_r1, MPI_INT, pr1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			}
+			if(pr1 != pr2 && pr2 >= 0 && pr2 < rank)
+			{
+				cnt_r2=(m*rank+(m-1))-w[i]-(m*pr2)+1;
+				MPI_Recv(&a[(i-1) * (C+1) + (m*pr2+(m-1)-cnt_r2)], cnt_r2, MPI_INT, pr2, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			}
 		}
 		for (j = rank*m; j < rank*m+m; j++)
 		{
@@ -87,17 +90,20 @@ void KnapSolver::solve()
 				}
 			}
 		}
-		ps1 = floor((m*rank+w[i+1])/m);
-		ps2 = floor((m*rank+m-1+w[i+1])/m);
-		if(ps1 <= size && ps1 > rank)
+		if(i != N-1)
 		{
-			cnt_s1 = m - (w[i+1] - m);
-			MPI_Send(&a[i * (C+1) + (m*rank)], cnt_s1, MPI_INT, ps1, 1, MPI_COMM_WORLD);
-		}
-		if(ps1 != ps2 && ps2 <= size && ps2 > rank)
-		{
-			cnt_s2 = (m*rank+(m-1))-(m*ps2-w[i+1])+1;
-			MPI_Send(&a[i * (C+1) + (m*rank+(m-1)-cnt_s2)], cnt_s2, MPI_INT, ps2, 1, MPI_COMM_WORLD);
+			ps1 = floor((m*rank+w[i+1])/m);
+			ps2 = floor((m*rank+m-1+w[i+1])/m);
+			if(ps1 <= size && ps1 > rank)
+			{
+				cnt_s1 = m - (w[i+1] - m);
+				MPI_Send(&a[i * (C+1) + (m*rank)], cnt_s1, MPI_INT, ps1, 1, MPI_COMM_WORLD);
+			}
+			if(ps1 != ps2 && ps2 <= size && ps2 > rank)
+			{
+				cnt_s2 = (m*rank+(m-1))-(m*ps2-w[i+1])+1;
+				MPI_Send(&a[i * (C+1) + (m*rank+(m-1)-cnt_s2)], cnt_s2, MPI_INT, ps2, 1, MPI_COMM_WORLD);
+			}
 		}
 	}
 	end = MPI_Wtime();
