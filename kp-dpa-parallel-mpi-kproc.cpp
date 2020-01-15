@@ -1,4 +1,5 @@
 #include<iostream>
+#include<algorithm>
 #include<stdlib.h>
 #include<stdio.h>
 #include<math.h>
@@ -12,45 +13,63 @@ class KnapSolver
 {
 	int *a, *p, *w, *x, C, N;
 public:
-	void read(char* file_name);
+	void read(int rank, char* file_name);
 	void solve();
 };
-void KnapSolver::read(char* file_name)
+
+void KnapSolver::read(int rank, char* file_name)
 {
 	ifstream g;
 	int count = 0;
-	g.open(file_name);
-	if (!g)
-	{
-		cerr << "Error: file could not be opened" << endl;
-		exit(1);
+	if(rank == 0) {
+		g.open(file_name);
+		if (!g)
+		{
+			cerr << "Error: file could not be opened" << endl;
+			exit(1);
+		}
+		g >> N;
+		g >> C;
+		p = new (nothrow) int [N];
+		if (p == nullptr)cout << "Error: memory could not be allocated for p.";
+		w = new (nothrow) int [N];
+		if (w == nullptr)cout << "Error: memory could not be allocated for w.";
+		while (!g.eof())
+		{
+			g >> p[count];
+			g >> w[count];
+			count++;
+			if(count > N)break;
+		}
+		g.close();
 	}
-	g >> N;
-	g >> C;
-	p = new (nothrow) int [N];
-	if (p == nullptr)cout << "Error: memory could not be allocated for p.";
-	w = new (nothrow) int [N];
-	if (w == nullptr)cout << "Error: memory could not be allocated for w.";
-	while (!g.eof())
-	{
-		g >> p[count];
-		g >> w[count];
-		count++;
-		if(count > N)break;
+	MPI_Bcast(&N, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&C, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	if(rank != 0) {
+		p = new (nothrow) int [N];
+		if (p == nullptr)cout << "Error: memory could not be allocated for p.";
+		w = new (nothrow) int [N];
+		if (w == nullptr)cout << "Error: memory could not be allocated for w.";
 	}
+	MPI_Bcast(p, N, MPI_INT, 0,  MPI_COMM_WORLD);
+	MPI_Bcast(w, N, MPI_INT, 0,  MPI_COMM_WORLD);
 }
+
 void KnapSolver::solve()
 {
 	int i, j, pr1, pr2, ps1, ps2, size, rank, m, cnt_r1, cnt_r2, cnt_s1, cnt_s2;
 	double start = 0, end = 0, startBT = 0, endBT = 0;
-	a = new (nothrow) int [N * (C+1)];
-	if (a == nullptr)cout << "Error: memory could not be allocated for a.";
 	x = new (nothrow) int [N];
-	if (x == nullptr)cout << "Error: memory could not be allocated for x.";
-	MPI_Init(NULL, NULL); //initialize MPI operations
+	if (x == nullptr)
+		cout << "Error: memory could not be allocated for x.";
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank); //get the rank
 	MPI_Comm_size(MPI_COMM_WORLD, &size); //get number of processes
-	m = (C+1)/size;
+	m = ceil((double)(C+1)/(double)size);
+	int nsize = m * size;
+	std::cout << " m = " << m << ", nsize = " << nsize << "C + 1 =" << C+1 << "\n";
+	a = new (nothrow) int [N * nsize];
+	if (a == nullptr)
+		cout << "Error: memory could not be allocated for a.";
 	start = MPI_Wtime();
 	for (i = 0; i < N; i++)
 	{
@@ -62,34 +81,34 @@ void KnapSolver::solve()
 			if(pr1 >= 0 && pr1 < rank)
 			{
 				cnt_r1=(m*pr1+(m-1))-(m*rank-w[i])+1;
-				MPI_Recv(&a[(i-1) * (C+1) + (m*pr1+(m-1)-cnt_r1+1)], cnt_r1, MPI_INT, pr1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+				MPI_Recv(&a[(i-1) * nsize + (m*rank-w[i])], cnt_r1, MPI_INT, pr1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 			}
 			if(pr1 != pr2 && pr2 >= 0 && pr2 < rank)
 			{
 				cnt_r2=(m*rank+(m-1))-w[i]-(m*pr2)+1;
-				MPI_Recv(&a[(i-1) * (C+1) + (m*pr2+(m-1)-cnt_r2)], cnt_r2, MPI_INT, pr2, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+				MPI_Recv(&a[(i-1) * nsize + m*pr2], cnt_r2, MPI_INT, pr2, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 			}
 		}
-		for (j = rank*m; j < (rank*m)+m; j++)
+		for (j = rank*m; j < std::min((rank*m)+m, C + 1); j++)
 		{
 			if (j < w[i])
 			{
 				if (j == 0 || i == 0)
-					a[i * (C+1) + j] = 0;
+					a[i * nsize + j] = 0;
 				else
-					a[i * (C+1) + j] = a[(i-1) * (C+1) + j];
+					a[i * nsize + j] = a[(i-1) * nsize + j];
 			}
 			if (j >= w[i])
 			{
 				if (i == 0)
-					a[i * (C+1) + j] = p[i];
+					a[i * nsize + j] = p[i];
 				else
 				{
 					int k = j - w[i];
-					a[i * (C+1) + j] = max(a[(i-1) * (C+1) + j], a[(i-1) * (C+1) + k] + p[i]);
+					a[i * nsize + j] = max(a[(i-1) * nsize + j], a[(i-1) * nsize + k] + p[i]);
 				}
 			}
-			if(i==N-1 && j==C)cout<<"\nAns = "<<a[i * (C+1) + j]<<".\n";
+			if(i==N-1 && j==C)cout<<"\nAns = "<<a[i * nsize + j]<<".\n";
 		}
 		if(i != N-1 && rank < size-1)
 		{
@@ -98,14 +117,14 @@ void KnapSolver::solve()
 			if(ps1 < size && ps1 > rank)
 			{
 				cnt_s1 = (m*ps1+(m-1))-w[i+1]-(m*rank)+1;
-				MPI_Send(&a[i * (C+1) + (m*rank)], cnt_s1, MPI_INT, ps1, 1, MPI_COMM_WORLD);
+				MPI_Send(&a[i * nsize + (m*rank)], cnt_s1, MPI_INT, ps1, 1, MPI_COMM_WORLD);
 				//cout<<"\nSending "<<cnt_s1<< " size, starting from " << a[i * (C+1) + (m*rank)]<<" to p" << ps1 << " from p"<<rank<<" of "<<i+1<<"th object. (ps1)\n";
 
 			}
 			if(ps1 != ps2 && ps2 < size && ps2 > rank)
 			{
 				cnt_s2 = (m*rank+(m-1))-(m*ps2-w[i+1])+1;
-				MPI_Send(&a[i * (C+1) + (m*rank+(m-1)-cnt_s2+1)], cnt_s2, MPI_INT, ps2, 1, MPI_COMM_WORLD);
+				MPI_Send(&a[i * nsize + m*ps2-w[i+1]], cnt_s2, MPI_INT, ps2, 1, MPI_COMM_WORLD);
 				//cout<<"\nSending "<<cnt_s2<< " size, starting from "<<a[i * (C+1) + (m*rank+(m-1)-cnt_s2+1)]<<" to p" << ps2 << " from p"<<rank<<" of "<<i+1<<"th object. (ps2)\n";
 			}
 		}
@@ -125,7 +144,7 @@ void KnapSolver::solve()
 	{
 		for (int i = N - 1; i >= 0; i--)
 		{
-			
+
 			if (i == 0)
 			{
 				if (a[i * (C+1) + k] == 0)
@@ -163,7 +182,7 @@ void KnapSolver::solve()
 				else
 					x[i] = 1;
 			}
-			else 
+			else
 			{
 				if(a[i * (C+1) + k] != a[(i-1) * (C+1) + k])
 				{
@@ -209,7 +228,6 @@ void KnapSolver::solve()
 		//cout << endBT - startBT << "\n";
 	//}
 	//cout<<endl;
-	MPI_Finalize(); //finalize MPI operations
 	delete[] p;
 	delete[] a;
 	delete[] x;
@@ -218,17 +236,23 @@ int main(int argc, char* argv[])
 {
 	KnapSolver kp;
 	char* str = NULL;
-	int nt = 1;
-	if (argc >= 2) {
-		str = argv[1];
+	int rank;
+	MPI_Init(&argc, &argv); //initialize MPI operations
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	if(rank == 0) {
+		if (argc >= 2) {
+			str = argv[1];
+		}
+		else {
+			fprintf(stderr, "usage: %s <input_file>\n", argv[0]);
+			MPI_Abort(MPI_COMM_WORLD, -1);
+		}
 	}
-	else {
-		fprintf(stderr, "usage: %s <input_file>\n", argv[0]);
-		exit(-1);
-	}
-	kp.read(str);
+	kp.read(rank, str);
 	//clock_t begin = clock();
 	kp.solve();
+	MPI_Finalize(); //finalize MPI operations
+
 	//clock_t end = clock();
 	//double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
 	//cout << "The process took " << time_spent << " seconds to run.\n";
