@@ -66,7 +66,7 @@ void KnapSolver::solve()
 	MPI_Comm_size(MPI_COMM_WORLD, &size); //get number of processes
 	m = ceil((double)(C+1)/(double)size);
 	int nsize = m * size;
-	std::cout << " m = " << m << ", nsize = " << nsize << "C + 1 =" << C+1 << "\n";
+	//std::cout << " m = " << m << ", nsize = " << nsize << ", C + 1 =" << C+1 << "\n";
 	a = new (nothrow) int [N * nsize];
 	if (a == nullptr)
 		cout << "Error: memory could not be allocated for a.";
@@ -108,7 +108,7 @@ void KnapSolver::solve()
 					a[i * nsize + j] = max(a[(i-1) * nsize + j], a[(i-1) * nsize + k] + p[i]);
 				}
 			}
-			if(i==N-1 && j==C)cout<<"\nAns = "<<a[i * nsize + j]<<".\n";
+			//if(i==N-1 && j==C)cout<<"\nAns = "<<a[i * nsize + j]<<".\n";
 		}
 		if(i != N-1 && rank < size-1)
 		{
@@ -132,7 +132,7 @@ void KnapSolver::solve()
 	end = MPI_Wtime();
 	if (rank == 0){
 		//cout << "\nThe process took " << end - start << " seconds to run." << std::endl;
-		cout << end - start << "\n";
+		cout << end - start << "\t";
 	}
 	MPI_Barrier(MPI_COMM_WORLD);
 	//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%//

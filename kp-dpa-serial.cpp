@@ -74,7 +74,7 @@ void KnapSolver::solve()
 			}
 		}
 	}
-	cout << "The maximum value is = " << a[C * N + N - 1] << endl;
+	//cout << "The maximum value is = " << a[C * N + N - 1] << endl;
 }
 void KnapSolver::backTrack()
 {

@@ -22,7 +22,7 @@ fi
 #
 # For solving Uncorrelated_data_instances
 #
-echo -e "No.\tSerial\tParallel OpenMP\tParallel MPI" >> RESULTS/Uncorrelated_data_instances_Results.xls
+echo -e "No.\tSerial\tParallel OpenMP-2\tParallel OpenMP-4\tParallel OpenMP-8\tParallel MPI-2\tParallel MPI-4\tParallel MPI-8" >> RESULTS/Uncorrelated_data_instances_Results.xls
 for file in Uncorrelated_data_instances/*
 do
 	for i in {1..10..1}
@@ -30,7 +30,11 @@ do
 		echo -n -e $i "\t" >> RESULTS/Uncorrelated_data_instances_Results.xls
 		./s.out $file >> RESULTS/Uncorrelated_data_instances_Results.xls
 		./o.out $file 2 >> RESULTS/Uncorrelated_data_instances_Results.xls
-		mpirun -np 2 p.out $file >> RESULTS/Uncorrelated_data_instances_Results.xls
+		./o.out $file 4 >> RESULTS/Uncorrelated_data_instances_Results.xls
+		./o.out $file 8 >> RESULTS/Uncorrelated_data_instances_Results.xls
+		mpirun -np 2 p2.out $file >> RESULTS/Uncorrelated_data_instances_Results.xls
+		mpirun -np 4 p4.out $file >> RESULTS/Uncorrelated_data_instances_Results.xls
+		mpirun -np 8 p8.out $file >> RESULTS/Uncorrelated_data_instances_Results.xls
 	done
 done
 echo "Uncorrelated_data_instances done"
@@ -46,7 +50,7 @@ fi
 #
 # For solving Uncorrelated_instances_with_similar_weights
 #
-echo -e "No.\tSerial\tParallel OpenMP\tParallel MPI" >> RESULTS/Uncorrelated_instances_with_similar_weights_Results.xls
+echo -e "No.\tSerial\tParallel OpenMP-2\tParallel OpenMP-4\tParallel OpenMP-8\tParallel MPI-2\tParallel MPI-4\tParallel MPI-8" >> RESULTS/Uncorrelated_instances_with_similar_weights_Results.xls
 for file in Uncorrelated_instances_with_similar_weights/*
 do
 	for i in {1..10..1}
@@ -54,7 +58,11 @@ do
 		echo -n -e $i "\t" >> RESULTS/Uncorrelated_instances_with_similar_weights_Results.xls
 		./s.out $file >> RESULTS/Uncorrelated_instances_with_similar_weights_Results.xls
 		./o.out $file 2 >> RESULTS/Uncorrelated_instances_with_similar_weights_Results.xls
-		mpirun -np 2 p.out $file >> RESULTS/Uncorrelated_instances_with_similar_weights_Results.xls
+		./o.out $file 4 >> RESULTS/Uncorrelated_instances_with_similar_weights_Results.xls
+		./o.out $file 8 >> RESULTS/Uncorrelated_instances_with_similar_weights_Results.xls
+		mpirun -np 2 p2.out $file >> RESULTS/Uncorrelated_instances_with_similar_weights_Results.xls
+		mpirun -np 4 p4.out $file >> RESULTS/Uncorrelated_instances_with_similar_weights_Results.xls
+		mpirun -np 8 p8.out $file >> RESULTS/Uncorrelated_instances_with_similar_weights_Results.xls
 	done
 done
 echo "Uncorrelated_instances_with_similar_weights done"
@@ -70,7 +78,7 @@ fi
 #
 # For solving Weekly_correlated_instances
 #
-echo -e "No.\tSerial\tParallel OpenMP\tParallel MPI" >> RESULTS/Weekly_correlated_instances_Results.xls
+echo -e "No.\tSerial\tParallel OpenMP-2\tParallel OpenMP-4\tParallel OpenMP-8\tParallel MPI-2\tParallel MPI-4\tParallel MPI-8" >> RESULTS/Weekly_correlated_instances_Results.xls
 for file in Weekly_correlated_instances/*
 do
 	for i in {1..10..1}
@@ -78,7 +86,11 @@ do
 		echo -n -e $i "\t" >> RESULTS/Weekly_correlated_instances_Results.xls
 		./s.out $file >> RESULTS/Weekly_correlated_instances_Results.xls
 		./o.out $file 2 >> RESULTS/Weekly_correlated_instances_Results.xls
-		mpirun -np 2 p.out $file >> RESULTS/Weekly_correlated_instances_Results.xls
+		./o.out $file 4 >> RESULTS/Weekly_correlated_instances_Results.xls
+		./o.out $file 8 >> RESULTS/Weekly_correlated_instances_Results.xls
+		mpirun -np 2 p2.out $file >> RESULTS/Weekly_correlated_instances_Results.xls
+		mpirun -np 4 p4.out $file >> RESULTS/Weekly_correlated_instances_Results.xls
+		mpirun -np 8 p8.out $file >> RESULTS/Weekly_correlated_instances_Results.xls
 	done
 done
 echo "Weekly_correlated_instances done"
@@ -94,7 +106,7 @@ fi
 #
 # For solving Almost_strongly_correlated_instances
 #
-echo -e "No.\tSerial\tParallel OpenMP\tParallel MPI" >> RESULTS/Almost_strongly_correlated_instances_Results.xls
+echo -e "No.\tSerial\tParallel OpenMP-2\tParallel OpenMP-4\tParallel OpenMP-8\tParallel MPI-2\tParallel MPI-4\tParallel MPI-8" >> RESULTS/Almost_strongly_correlated_instances_Results.xls
 for file in Almost_strongly_correlated_instances/*
 do
 	for i in {1..10..1}
@@ -102,7 +114,11 @@ do
 		echo -n -e $i "\t" >> RESULTS/Almost_strongly_correlated_instances_Results.xls
 		./s.out $file >> RESULTS/Almost_strongly_correlated_instances_Results.xls
 		./o.out $file 2 >> RESULTS/Almost_strongly_correlated_instances_Results.xls
-		mpirun -np 2 p.out $file >> RESULTS/Almost_strongly_correlated_instances_Results.xls
+		./o.out $file 4 >> RESULTS/Almost_strongly_correlated_instances_Results.xls
+		./o.out $file 8 >> RESULTS/Almost_strongly_correlated_instances_Results.xls
+		mpirun -np 2 p2.out $file >> RESULTS/Almost_strongly_correlated_instances_Results.xls
+		mpirun -np 4 p4.out $file >> RESULTS/Almost_strongly_correlated_instances_Results.xls
+		mpirun -np 8 p8.out $file >> RESULTS/Almost_strongly_correlated_instances_Results.xls
 	done
 done
 echo "Almost_strongly_correlated_instances done"
@@ -118,7 +134,7 @@ fi
 #
 # For solving Strongly_correlated_instances
 #
-echo -e "No.\tSerial\tParallel OpenMP\tParallel MPI" >> RESULTS/Strongly_correlated_instances_Results.xls
+echo -e "No.\tSerial\tParallel OpenMP-2\tParallel OpenMP-4\tParallel OpenMP-8\tParallel MPI-2\tParallel MPI-4\tParallel MPI-8" >> RESULTS/Strongly_correlated_instances_Results.xls
 for file in Strongly_correlated_instances/*
 do
 	for i in {1..10..1}
@@ -126,7 +142,11 @@ do
 		echo -n -e $i "\t" >> RESULTS/Strongly_correlated_instances_Results.xls
 		./s.out $file >> RESULTS/Strongly_correlated_instances_Results.xls
 		./o.out $file 2 >> RESULTS/Strongly_correlated_instances_Results.xls
-		mpirun -np 2 p.out $file >> RESULTS/Strongly_correlated_instances_Results.xls
+		./o.out $file 4 >> RESULTS/Strongly_correlated_instances_Results.xls
+		./o.out $file 8 >> RESULTS/Strongly_correlated_instances_Results.xls
+		mpirun -np 2 p2.out $file >> RESULTS/Strongly_correlated_instances_Results.xls
+		mpirun -np 4 p4.out $file >> RESULTS/Strongly_correlated_instances_Results.xls
+		mpirun -np 8 p8.out $file >> RESULTS/Strongly_correlated_instances_Results.xls
 	done
 done
 echo "Strongly_correlated_instances done"
@@ -142,7 +162,7 @@ fi
 #
 # For solving Inverse_strongly_correlated_instances
 #
-echo -e "No.\tSerial\tParallel OpenMP\tParallel MPI" >> RESULTS/Inverse_strongly_correlated_instances_Results.xls
+echo -e "No.\tSerial\tParallel OpenMP-2\tParallel OpenMP-4\tParallel OpenMP-8\tParallel MPI-2\tParallel MPI-4\tParallel MPI-8" >> RESULTS/Inverse_strongly_correlated_instances_Results.xls
 for file in Inverse_strongly_correlated_instances/*
 do
 	for i in {1..10..1}
@@ -150,7 +170,11 @@ do
 		echo -n -e $i "\t" >> RESULTS/Inverse_strongly_correlated_instances_Results.xls
 		./s.out $file >> RESULTS/Inverse_strongly_correlated_instances_Results.xls
 		./o.out $file 2 >> RESULTS/Inverse_strongly_correlated_instances_Results.xls
-		mpirun -np 2 p.out $file >> RESULTS/Inverse_strongly_correlated_instances_Results.xls
+		./o.out $file 4 >> RESULTS/Inverse_strongly_correlated_instances_Results.xls
+		./o.out $file 8 >> RESULTS/Inverse_strongly_correlated_instances_Results.xls
+		mpirun -np 2 p2.out $file >> RESULTS/Inverse_strongly_correlated_instances_Results.xls
+		mpirun -np 4 p4.out $file >> RESULTS/Inverse_strongly_correlated_instances_Results.xls
+		mpirun -np 8 p8.out $file >> RESULTS/Inverse_strongly_correlated_instances_Results.xls
 	done
 done
 echo "Inverse_strongly_correlated_instances done"
@@ -166,7 +190,7 @@ fi
 #
 # For solving Subset_sum_instances
 #
-echo -e "No.\tSerial\tParallel OpenMP\tParallel MPI" >> RESULTS/Subset_sum_instances_Results.xls
+echo -e "No.\tSerial\tParallel OpenMP-2\tParallel OpenMP-4\tParallel OpenMP-8\tParallel MPI-2\tParallel MPI-4\tParallel MPI-8" >> RESULTS/Subset_sum_instances_Results.xls
 for file in Subset_sum_instances/*
 do
 	for i in {1..10..1}
@@ -174,7 +198,11 @@ do
 		echo -n -e $i "\t" >> RESULTS/Subset_sum_instances_Results.xls
 		./s.out $file >> RESULTS/Subset_sum_instances_Results.xls
 		./o.out $file 2 >> RESULTS/Subset_sum_instances_Results.xls
-		mpirun -np 2 p.out $file >> RESULTS/Subset_sum_instances_Results.xls
+		./o.out $file 4 >> RESULTS/Subset_sum_instances_Results.xls
+		./o.out $file 8 >> RESULTS/Subset_sum_instances_Results.xls
+		mpirun -np 2 p2.out $file >> RESULTS/Subset_sum_instances_Results.xls
+		mpirun -np 4 p4.out $file >> RESULTS/Subset_sum_instances_Results.xls
+		mpirun -np 8 p8.out $file >> RESULTS/Subset_sum_instances_Results.xls
 	done
 done
 echo "Subset_sum_instances done"
