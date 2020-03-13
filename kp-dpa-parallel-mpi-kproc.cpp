@@ -126,6 +126,43 @@ void KnapSolver::solve() {
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%//
     /////Back tracking algorithm./////
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%//
+    startBT = MPI_Wtime();
+    int j, k = C, EndPointOfP = 0, i = N-1;
+    //for(int i = N - 1; i >= 0; i--){
+    while(i >= 0){
+        if(rank < size-1)
+        {
+            MPI_Recv(&j, 1, MPI_INT, rank+1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            k=k-w[j];
+        }
+        if(i == 0)
+        {
+            if (a[i * (C+1) + k] == 0)
+            {
+                x[i] = 0;
+                i--;
+            }
+            else
+            {
+                x[i] = 1;
+                i--;
+            }
+        }
+        else if (a[i * (C+1) + k] != a[(i-1) * (C+1) + k])
+        {
+            x[i] = 1;
+            if(k-w[i]<P1)
+            {
+                EndPointOfP1 = i;
+                MPI_Send(&i, 1, MPI_INT, 0, 1, MPI_COMM_WORLD);
+                break;
+            }
+            k = k - w[i];
+        }
+        else
+            x[i] = 0;
+    }
+    endBT = MPI_Wtime();
     /*startBT = MPI_Wtime();
     int k = C, EndPointOfP1 = 0;
     if(rank == 1)
