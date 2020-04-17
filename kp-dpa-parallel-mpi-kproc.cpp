@@ -54,7 +54,7 @@ void KnapSolver::read(int rank, char* file_name) {
 void KnapSolver::solve() {
     int i, j, pr1, pr2, ps1, ps2, size, rank, m, cnt_r1, cnt_r2, cnt_s1, cnt_s2;
     double start = 0, end = 0, startBT = 0, endBT = 0;
-    x = new (nothrow) int [N];
+    x = new (nothrow) int [N+2];
     if (x == nullptr)
         cout << "Error: memory could not be allocated for x.";
     MPI_Comm_rank(MPI_COMM_WORLD, &rank); //get the rank
@@ -132,12 +132,12 @@ void KnapSolver::solve() {
     while(i >= 0){
         if(rank < size-1)
         {
-            MPI_Recv(&j, 1, MPI_INT, rank+1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            k=k-w[j];
+            MPI_Recv(&x, N+2, MPI_INT, rank+1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            if(x[N+1] < m*rank) goto label_1;
         }
         if(i == 0)
         {
-            if (a[i * (C+1) + k] == 0)
+            if (a[i * (C+1) + x[N+1]] == 0)
             {
                 x[i] = 0;
                 i--;
@@ -148,6 +148,9 @@ void KnapSolver::solve() {
                 i--;
             }
         }
+        
+        label_1:
+        MPI_Send(&x, N+2, MPI_INT, rank-1, 1, MPI_COMM_WORLD);
         else if (a[i * (C+1) + k] != a[(i-1) * (C+1) + k])
         {
             x[i] = 1;
