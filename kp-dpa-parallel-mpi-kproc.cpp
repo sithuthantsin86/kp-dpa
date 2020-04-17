@@ -96,7 +96,7 @@ void KnapSolver::solve() {
                     a[i * nsize + j] = max(a[(i - 1) * nsize + j], a[(i - 1) * nsize + k] + p[i]);
                 }
             }
-            //if (i == N - 1 && j == C)cout << "\nAns = " << a[i * nsize + j] << ".\n";
+            if (i == N - 1 && j == C)cout << "\nAns = " << a[i * nsize + j] << ".\n";
         }
         if (i != N - 1 && rank < size - 1) {
             const int pbeg = m * rank + w[i + 1];
@@ -122,10 +122,6 @@ void KnapSolver::solve() {
         cout << end - start << "\n";
     }
     MPI_Barrier(MPI_COMM_WORLD);
-    //if (rank == size-1)
-    //{
-    //    cout << "\nOptimal value = "<<a[C * N + N]<<".\n";
-    //}
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%//
     /////Back tracking algorithm./////
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%//
