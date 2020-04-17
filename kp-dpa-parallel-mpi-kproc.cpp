@@ -54,7 +54,7 @@ void KnapSolver::read(int rank, char* file_name) {
 void KnapSolver::solve() {
     int i, j, pr1, pr2, ps1, ps2, size, rank, m, cnt_r1, cnt_r2, cnt_s1, cnt_s2;
     double start = 0, end = 0, startBT = 0, endBT = 0;
-    x = new (nothrow) int [N+2];
+    x = new (nothrow) int [N+1];
     if (x == nullptr)cout << "Error: memory could not be allocated for x.";
     MPI_Comm_rank(MPI_COMM_WORLD, &rank); //get the rank
     MPI_Comm_size(MPI_COMM_WORLD, &size); //get number of processes
@@ -126,17 +126,22 @@ void KnapSolver::solve() {
     /////Back tracking algorithm./////
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%//
     int k;
-    x[N] = C;
-    x[N+1] = N-1;
     startBT = MPI_Wtime();
+    if(rank == size-1)
+    {
+        k = x[N] = C;
+        i = x[N+1] = N-1;
+    }
+    //cout<<"Process "<<rank<<" of "<<size<<".\n";
     if(rank < size-1)
     {
-        MPI_Recv(&x, N+2, MPI_INT, rank+1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        cout<<"Process "<<rank<<" is receiving i="<<x[N+1]<<" and k="<<x[N]<<".";
+        //cout<<"\nProcess "<<rank<<" receiving from process "<<rank+1<<".---\n";
+        MPI_Recv(x, N+1, MPI_INT, rank+1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        cout<<"\nProcess "<<rank<<" received i="<<x[N+1]<<" and k="<<x[N]<<" from process "<<rank+1<<".\n";
+        k = x[N];
+        i = x[N+1];
     }
-    k = x[N];
-    i = x[N+1];
-    cout<<"Process "<<rank<<" is doing while with i="<<i<<" and k="<<k<<".";
+    cout<<"\nProcess "<<rank<<" is doing while with i="<<i<<" and k="<<k<<" and StartingPointOfProcess="<<rank*m<<".\n";
     while(i >= 0 && k >= rank*m)
     {
         if(i == 0)
@@ -159,17 +164,29 @@ void KnapSolver::solve() {
             x[N] = k;
             i--;
             x[N+1] = i;
+            cout<<"\nProcess "<<rank<<" is adding "<<x[i+1]<<" to the "<<i+1<<"th place and next k="<<x[N]<<" and i="<<x[N+1]<<".\n";
         }
         else
         {
             x[i] = 0;
             i--;
             x[N+1] = i;
+            cout<<"\nProcess "<<rank<<" is adding "<<x[i+1]<<" to the "<<i+1<<"th place and next k="<<x[N]<<" and i="<<x[N+1]<<".\n";
         }
     }
     if(rank != 0)
     {
-        MPI_Send(&x, N+2, MPI_INT, rank-1, 1, MPI_COMM_WORLD);
+        MPI_Send(x, N+1, MPI_INT, rank-1, 1, MPI_COMM_WORLD);
+        cout<<"\nProcess "<<rank<<" is sending k="<<x[N]<<" and i="<<x[N+1]<<" to process "<<rank-1<<".\n";
+    }
+    if(rank == 0)
+    {
+        cout<<"\nThe solution vector = {";
+        for(int i=0; i<N; i++){
+            cout<<x[i];
+            if(i!=N-1)cout<<", ";
+        }
+        cout<<"}.\n";
     }
     endBT = MPI_Wtime();
     MPI_Barrier(MPI_COMM_WORLD);
