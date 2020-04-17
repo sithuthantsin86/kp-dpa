@@ -163,9 +163,7 @@ void KnapSolver::solve() {
         {
             x[i] = 1;
             k = k - w[i];
-           // x[N] = k;
             i--;
-           // x[N+1] = i;
             //cout<<"\nProcess "<<rank<<" is adding "<<x[i+1]<<" to the "<<i+1<<"th place and next k="<<x[N]<<" and i="<<x[N+1]<<".\n";
         }
         else
