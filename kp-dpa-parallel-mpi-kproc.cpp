@@ -150,14 +150,12 @@ void KnapSolver::solve() {
             {
                 x[i] = 0;
                 i--;
-                x[N+1] = i;
                 //cout<<"\nProcess "<<rank<<" is adding "<<x[i+1]<<" to the "<<i+1<<"th place and next k="<<x[N]<<" and i="<<x[N+1]<<".\n";
             }
             else
             {
                 x[i] = 1;
                 i--;
-                x[N+1] = i;
                 //cout<<"\nProcess "<<rank<<" is adding "<<x[i+1]<<" to the "<<i+1<<"th place and next k="<<x[N]<<" and i="<<x[N+1]<<".\n";
             }
         }
@@ -174,7 +172,6 @@ void KnapSolver::solve() {
         {
             x[i] = 0;
             i--;
-            x[N+1] = i;
             //cout<<"\nProcess "<<rank<<" is adding "<<x[i+1]<<" to the "<<i+1<<"th place and next k="<<x[N]<<" and i="<<x[N+1]<<".\n";
         }
     }
