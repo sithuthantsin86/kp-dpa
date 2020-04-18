@@ -51,6 +51,7 @@ void KnapSolver::read(int rank, char* file_name) {
     MPI_Bcast(p, N, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(w, N, MPI_INT, 0, MPI_COMM_WORLD);
 }
+
 void KnapSolver::solve() {
     int i, j, pr1, pr2, ps1, ps2, size, rank, m, cnt_r1, cnt_r2, cnt_s1, cnt_s2;
     double start = 0, end = 0, startBT = 0, endBT = 0;
@@ -96,7 +97,7 @@ void KnapSolver::solve() {
                     a[i * nsize + j] = max(a[(i - 1) * nsize + j], a[(i - 1) * nsize + k] + p[i]);
                 }
             }
-            if (i == N - 1 && j == C)cout << "\nAns = " << a[i * nsize + j] << ".\n";
+            if (i == N - 1 && j == C)cout << "\nThe optimal value = " << a[i * nsize + j] << ".\n";
         }
         if (i != N - 1 && rank < size - 1) {
             const int pbeg = m * rank + w[i + 1];
@@ -107,7 +108,6 @@ void KnapSolver::solve() {
                 cnt_s1 = (m * ps1 + (m - 1)) - pbeg + 1;
                 MPI_Send(&a[i * nsize + (m * rank)], cnt_s1, MPI_INT, ps1, 1, MPI_COMM_WORLD);
                 //cout<<"\nSending "<<cnt_s1<< " size, starting from " << a[i * (C+1) + (m*rank)]<<" to p" << ps1 << " from p"<<rank<<" of "<<i+1<<"th object. (ps1)\n";
-
             }
             if (ps1 != ps2 && ps2 < size && ps2 > rank) {
                 cnt_s2 = pend - m * ps2 + 1;
@@ -135,7 +135,6 @@ void KnapSolver::solve() {
     //cout<<"Process "<<rank<<" of "<<size<<".\n";
     if(rank < size-1)
     {
-        //cout<<"\nProcess "<<rank<<" receiving from process "<<rank+1<<".---\n";
         MPI_Recv(x, N+2, MPI_INT, rank+1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         //cout<<"\nProcess "<<rank<<" received i="<<x[N+1]<<" and k="<<x[N]<<" from process "<<rank+1<<".\n";
         k = x[N];
@@ -178,13 +177,14 @@ void KnapSolver::solve() {
     if(rank != 0)
     {
         MPI_Send(x, N+2, MPI_INT, rank-1, 1, MPI_COMM_WORLD);
-        //cout<<"\nProcess "<<rank<<" is sending k="<<x[N]<<" and i="<<x[N+1]<<" to process "<<rank-1<<".\n";
-       //  cout<<"\nThe solution vector in "<<i<<"th step = {";
-       // for(int i=0; i<N+1; i++){
-       //     cout<<x[i];
-       //     if(i!=N-1)cout<<", ";
-       // }
-       // cout<<"}.\n";
+        //cout<<"\nProcess "<<rank<<" sent k="<<x[N]<<" and i="<<x[N+1]<<" to process "<<rank-1<<".\n";
+        /*cout<<"\nThe solution vector in "<<i<<"th step = {";
+        for(int i=0; i<N+1; i++)
+        {
+            cout<<x[i];
+            if(i!=N-1)cout<<", ";
+        }
+        cout<<"}.\n";*/
     }
     if(rank == 0)
     {
