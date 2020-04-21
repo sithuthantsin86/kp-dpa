@@ -96,9 +96,9 @@ void KnapSolver::backTrack()
 		else
 			x[i] = 0;
 	}
-	cout<<endl;
-	for(int i=0; i<N; i++)cout<<"x ="<<x[i]<<",";
-	cout<<endl;
+	//cout<<endl;
+	//for(int i=0; i<N; i++)cout<<"x ="<<x[i]<<",";
+	//cout<<endl;
 	delete[] p;
 	delete[] a;
 	delete[] x;

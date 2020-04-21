@@ -8,6 +8,7 @@
 #include<time.h>
 #include<new>
 #include<mpi.h>
+
 using namespace std;
 
 class KnapSolver {
@@ -97,7 +98,7 @@ void KnapSolver::solve() {
                     a[i * nsize + j] = max(a[(i - 1) * nsize + j], a[(i - 1) * nsize + k] + p[i]);
                 }
             }
-            if (i == N - 1 && j == C)cout << "\nThe optimal value = " << a[i * nsize + j] << ".\n";
+            //if (i == N - 1 && j == C)cout << "\nThe optimal value = " << a[i * nsize + j] << ".\n";
         }
         if (i != N - 1 && rank < size - 1) {
             const int pbeg = m * rank + w[i + 1];
@@ -117,10 +118,10 @@ void KnapSolver::solve() {
         }
     }
     end = MPI_Wtime();
-    if (rank == 0) {
+    /*if (rank == 0) {
         //cout << "\nThe process took " << end - start << " seconds to run." << std::endl;
-        cout << end - start << "\n";
-    }
+        cout <<"\nThe direct calculation runtime = "<< end - start << "\n";
+    }*/
     MPI_Barrier(MPI_COMM_WORLD);
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%//
     /////Back tracking algorithm./////
@@ -186,17 +187,19 @@ void KnapSolver::solve() {
         }
         cout<<"}.\n";*/
     }
+    MPI_Barrier(MPI_COMM_WORLD);
+    endBT = MPI_Wtime();
     if(rank == 0)
     {
-        cout<<"\nThe solution vector = {";
+        //cout <<"\nThe inverse calculation runtime = "<< endBT - startBT << "\n";
+        cout << (end - start) + (endBT - startBT) << "\t";
+        /*cout<<"\nThe solution vector = {";
         for(int i=0; i<N; i++){
             cout<<x[i];
             if(i!=N-1)cout<<", ";
         }
-        cout<<"}.\n";
+        cout<<"}.\n";*/
     }
-    endBT = MPI_Wtime();
-    MPI_Barrier(MPI_COMM_WORLD);
     delete[] p;
     delete[] a;
     delete[] x;
@@ -220,9 +223,7 @@ int main(int argc, char* argv[]) {
     //clock_t begin = clock();
     kp.solve();
     MPI_Finalize(); //finalize MPI operations
-
     //clock_t end = clock();
     //double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-    //cout << "The process took " << time_spent << " seconds to run.\n";
-    //cout << time_spent << "\t";
+    //cout << "\nThe process took " << time_spent << " seconds to run.\n";
 }
