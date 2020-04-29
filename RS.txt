@@ -1,0 +1,17 @@
+#Serial Tests (runtimes are average time on 10 results)
+  500x1000 = 0.0099292 sec
+  1000x500 = 0,0097383 sec
+  250x2000 = 0,0097546 sec
+  2000x250 = 0,0090385 sec
+  100x5000 = 0,0099616 sec
+  5000x100 = 0,0098442 sec
+
+#Parallel Tests with 4 process (runtimes are average time on 10 results)
+  500x1000 = 0,00327593 sec
+  1000x500 = 0,003829078 sec
+  250x2000 = 0,00239324 sec
+  2000x250 = 0,003253686 sec
+  100x5000 = 0,002439177 sec
+  5000x100 = 0,003889659 sec
+
+Generator (https://github.com/sithuthantsin86/kp-dpa/blob/master/kp-dpa-gen.cpp)

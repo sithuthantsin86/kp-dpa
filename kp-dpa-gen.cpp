@@ -28,20 +28,22 @@ void generator(int number_of_items, int capacity, int num_instances)
 	struct stat st;
 	srand (time(&t));
 	FILE *a;
-	int *p, *w;
+	int *p, *w, K=0;
 	p=(int *)malloc(number_of_items*sizeof(int));
 	if(p == NULL){cerr<<"Error : Your size is too much.\n";exit(1);}
 	w=(int *)malloc(number_of_items*sizeof(int));
     if(w == NULL){cerr<<"Error : Your size is too much.\n";exit(1);}
 	if(stat("NxC_test_MPI", &st) == 0)system("rm -r NxC_test_MPI");
+	K = min(max(4 * capacity/number_of_items, 10), capacity);
+	cout << "\nK = " << K << "\n";
 	for(int j=0;j<num_instances;j++){
 			string M="NxC_test_MPI";
 			//if(stat("UC", &st) == 0)system("rm -r UC");
 			mkdir("NxC_test_MPI", 0777);
 			a=fopen(file_name(M, number_of_items, capacity, j+1).c_str(), "w");
 			for(int i=0;i<number_of_items;i++){
-				p[i] = (rand() % (2*capacity/number_of_items)) + 1;
-				w[i] = (rand() % (2*capacity/number_of_items)) + 1;
+				p[i] = (rand() % K + 1);
+				w[i] = (rand() % K + 1);
 			}
 			printPair(a, p, w, number_of_items, capacity);
 			fclose(a);
