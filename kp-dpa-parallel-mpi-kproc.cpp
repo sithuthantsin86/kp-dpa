@@ -192,7 +192,7 @@ void KnapSolver::solve() {
     if(rank == 0)
     {
         //cout <<"\nThe inverse calculation runtime = "<< endBT - startBT << "\n";
-        cout << (end - start) + (endBT - startBT) << "\t";
+        cout << (end - start) + (endBT - startBT) << "\n";
         /*cout<<"\nThe solution vector = {";
         for(int i=0; i<N; i++){
             cout<<x[i];

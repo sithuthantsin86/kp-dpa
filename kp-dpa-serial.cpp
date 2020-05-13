@@ -127,5 +127,5 @@ int main(int argc, char* argv[])
 	clock_t endBT = clock();
 	double time_spent_BT = (double)(endBT - beginBT) / CLOCKS_PER_SEC;
 	//cout << "The process took " << time_spent << " seconds to run.\n";
-	cout << time_spent + time_spent_BT << "\t";
+	cout << time_spent + time_spent_BT << "\n";
 }
