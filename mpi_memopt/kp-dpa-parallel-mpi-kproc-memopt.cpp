@@ -8,6 +8,7 @@
 #include<time.h>
 #include<new>
 #include<mpi.h>
+
 using namespace std;
 
 class KnapSolver {
@@ -51,12 +52,12 @@ void KnapSolver::read(int rank, char* file_name) {
     MPI_Bcast(p, N, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(w, N, MPI_INT, 0, MPI_COMM_WORLD);
 }
-void KnapSolver::solve() {
+
+void KnapSolver::solve() { 
     int i, j, pr1, pr2, ps1, ps2, size, rank, m, cnt_r1, cnt_r2, cnt_s1, cnt_s2;
     double start = 0, end = 0, startBT = 0, endBT = 0;
     x = new (nothrow) int [N+2];
-    if (x == nullptr)
-        cout << "Error: memory could not be allocated for x.";
+    if (x == nullptr)cout << "Error: memory could not be allocated for x.";
     MPI_Comm_rank(MPI_COMM_WORLD, &rank); //get the rank
     MPI_Comm_size(MPI_COMM_WORLD, &size); //get number of processes
     m = ceil((double) (C + 1) / (double) size);
@@ -97,7 +98,7 @@ void KnapSolver::solve() {
                     a[i * nsize + j] = max(a[(i - 1) * nsize + j], a[(i - 1) * nsize + k] + p[i]);
                 }
             }
-            //if (i == N - 1 && j == C)cout << "\nAns = " << a[i * nsize + j] << ".\n";
+            //if (i == N - 1 && j == C)cout << "\nThe optimal value = " << a[i * nsize + j] << ".\n";
         }
         if (i != N - 1 && rank < size - 1) {
             const int pbeg = m * rank + w[i + 1];
@@ -108,7 +109,6 @@ void KnapSolver::solve() {
                 cnt_s1 = (m * ps1 + (m - 1)) - pbeg + 1;
                 MPI_Send(&a[i * nsize + (m * rank)], cnt_s1, MPI_INT, ps1, 1, MPI_COMM_WORLD);
                 //cout<<"\nSending "<<cnt_s1<< " size, starting from " << a[i * (C+1) + (m*rank)]<<" to p" << ps1 << " from p"<<rank<<" of "<<i+1<<"th object. (ps1)\n";
-
             }
             if (ps1 != ps2 && ps2 < size && ps2 > rank) {
                 cnt_s2 = pend - m * ps2 + 1;
@@ -118,147 +118,88 @@ void KnapSolver::solve() {
         }
     }
     end = MPI_Wtime();
-    if (rank == 0) {
+    /*if (rank == 0) {
         //cout << "\nThe process took " << end - start << " seconds to run." << std::endl;
-        cout << end - start << "\n";
-    }
+        cout <<"\nThe direct calculation runtime = "<< end - start << "\n";
+    }*/
     MPI_Barrier(MPI_COMM_WORLD);
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%//
     /////Back tracking algorithm./////
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%//
+    int k;
     startBT = MPI_Wtime();
-    int i = N-1;
-    x[N+1] = C;
-    //for(int i = N - 1; i >= 0; i--){
-    while(i >= 0){
-        if(rank < size-1)
-        {
-            MPI_Recv(&x, N+2, MPI_INT, rank+1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            if(x[N+1] < m*rank) goto label_1;
-        }
+    if(rank == size-1)
+    {
+        k = x[N] = C;
+        i = x[N+1] = N-1;
+    }
+    //cout<<"Process "<<rank<<" of "<<size<<".\n";
+    if(rank < size-1)
+    {
+        MPI_Recv(x, N+2, MPI_INT, rank+1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        //cout<<"\nProcess "<<rank<<" received i="<<x[N+1]<<" and k="<<x[N]<<" from process "<<rank+1<<".\n";
+        k = x[N];
+        i = x[N+1];
+    }
+    //cout<<"\nProcess "<<rank<<" is doing while with i="<<i<<" and k="<<k<<" and StartingPointOfProcess="<<rank*m<<".\n";
+    while(i >= 0 && k >= rank*m)
+    {
         if(i == 0)
         {
-            if (a[i * (C+1) + x[N+1]] == 0)
+            if (a[i * (C+1) + k] == 0)
             {
                 x[i] = 0;
                 i--;
+                //cout<<"\nProcess "<<rank<<" is adding "<<x[i+1]<<" to the "<<i+1<<"th place and next k="<<x[N]<<" and i="<<x[N+1]<<".\n";
             }
             else
             {
                 x[i] = 1;
                 i--;
+                //cout<<"\nProcess "<<rank<<" is adding "<<x[i+1]<<" to the "<<i+1<<"th place and next k="<<x[N]<<" and i="<<x[N+1]<<".\n";
             }
         }
-        else if (a[i * (C+1) + x[N+1]] != a[(i-1) * (C+1) + x[N+1]])
+        else if (a[i * (C+1) + k] != a[(i-1) * (C+1) + k])
         {
             x[i] = 1;
-            x[N+1] = x[N+1] - w[i];
-            x[N+2] = i;
+            k = k - w[i];
             i--;
+            //cout<<"\nProcess "<<rank<<" is adding "<<x[i+1]<<" to the "<<i+1<<"th place and next k="<<x[N]<<" and i="<<x[N+1]<<".\n";
         }
         else
         {
             x[i] = 0;
-            x[N+2] = i;
             i--;
-        }
-        label_1:
-        if(rank != 0)
-        {
-            MPI_Send(&x, N+2, MPI_INT, rank-1, 1, MPI_COMM_WORLD);
+            //cout<<"\nProcess "<<rank<<" is adding "<<x[i+1]<<" to the "<<i+1<<"th place and next k="<<x[N]<<" and i="<<x[N+1]<<".\n";
         }
     }
-    endBT = MPI_Wtime();
-    /*startBT = MPI_Wtime();
-    int k = C, EndPointOfP1 = 0;
-    if(rank == 1)
+    x[N] = k;
+    x[N+1] = i;
+    if(rank != 0)
     {
-            for (int i = N - 1; i >= 0; i--)
-            {
-
-                    if (i == 0)
-                    {
-                            if (a[i * (C+1) + k] == 0)
-                                    x[i] = 0;
-                            else
-                                    x[i] = 1;
-                    }
-                    else if (a[i * (C+1) + k] != a[(i-1) * (C+1) + k])
-                    {
-                            x[i] = 1;
-                            if(k-w[i]<P1)
-                            {
-                                    EndPointOfP1 = i;
-                                    MPI_Send(&i, 1, MPI_INT, 0, 1, MPI_COMM_WORLD);
-                                    break;
-                            }
-                            k = k - w[i];
-                    }
-                    else
-                            x[i] = 0;
-            }
-            MPI_Send(&x[EndPointOfP1], N - EndPointOfP1, MPI_INT, 0, 1, MPI_COMM_WORLD);
+        MPI_Send(x, N+2, MPI_INT, rank-1, 1, MPI_COMM_WORLD);
+        //cout<<"\nProcess "<<rank<<" sent k="<<x[N]<<" and i="<<x[N+1]<<" to process "<<rank-1<<".\n";
+        /*cout<<"\nThe solution vector in "<<i<<"th step = {";
+        for(int i=0; i<N+1; i++)
+        {
+            cout<<x[i];
+            if(i!=N-1)cout<<", ";
+        }
+        cout<<"}.\n";*/
     }
+    MPI_Barrier(MPI_COMM_WORLD);
+    endBT = MPI_Wtime();
     if(rank == 0)
     {
-            int j;
-            MPI_Recv(&j, 1, MPI_INT, 1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            k=k-w[j];
-            for (int i = j-1; i >= 0; i--)
-            {
-                    if(i == 0)
-                    {
-                            if (a[i * (C+1) + k] == 0)
-                                    x[i] = 0;
-                            else
-                                    x[i] = 1;
-                    }
-                    else
-                    {
-                            if(a[i * (C+1) + k] != a[(i-1) * (C+1) + k])
-                            {
-                                    x[i] = 1;
-                                    k = k - w[i];
-                            }
-                            else
-                            {
-                                    x[i] = 0;
-                            }
-                    }
-            }
-            MPI_Recv(&x[j], N - j, MPI_INT, 1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            //cout<<"The solution vector X = {";
-            //for(int i=0; i<=j; i++){
-            //	cout<<x[i];
-            //	if(i<j)cout<<",";
-            //}
-            //cout<<"}\n";
+        //cout <<"\nThe inverse calculation runtime = "<< endBT - startBT << "\n";
+        cout << (end - start) + (endBT - startBT) << "\n";
+        /*cout<<"\nThe solution vector = {";
+        for(int i=0; i<N; i++){
+            cout<<x[i];
+            if(i!=N-1)cout<<", ";
+        }
+        cout<<"}.\n";*/
     }
-    endBT = MPI_Wtime();
-    MPI_Barrier(MPI_COMM_WORLD);*/
-    /*if(rank == 1){
-            //cout << "\nThe process took " << end - start << " seconds to run." << std::endl;
-            //MPI_Send(end-start, 1, MPT_D);
-            double runtime = end - start;
-            //cout << runtime << "\n";
-            MPI_Send(&runtime, 1, MPI_DOUBLE, 0, 1, MPI_COMM_WORLD);
-    }*/
-    /*if(rank == 0){
-            double runtime_all;
-            MPI_Recv(&runtime_all, 1, MPI_DOUBLE, 1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            //cout << endBT - startBT <<"\t";
-            runtime_all = runtime_all+ (endBT - startBT);
-            cout << runtime_all <<"\n";
-    //	cout << "The backtrack algrithm process took " << end - start << " seconds to run." << std::endl;
-    }*/
-    //MPI_Barrier(MPI_COMM_WORLD);
-    //cout<<"x from P1 = ";
-    //if(rank==1)for(int i=0; i<N; i++){
-    //cout<<x[i]<<",";
-    //cout << "The backtrack algrithm process took " << endBT - startBT << " seconds to run." << std::endl;
-    //cout << endBT - startBT << "\n";
-    //}
-    //cout<<endl;
     delete[] p;
     delete[] a;
     delete[] x;
@@ -282,9 +223,7 @@ int main(int argc, char* argv[]) {
     //clock_t begin = clock();
     kp.solve();
     MPI_Finalize(); //finalize MPI operations
-
     //clock_t end = clock();
     //double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-    //cout << "The process took " << time_spent << " seconds to run.\n";
-    //cout << time_spent << "\t";
+    //cout << "\nThe process took " << time_spent << " seconds to run.\n";
 }

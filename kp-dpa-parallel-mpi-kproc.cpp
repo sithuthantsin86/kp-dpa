@@ -1,6 +1,3 @@
-///
-///This is the project of Knapsack Problem.
-///
 #include<iostream>
 #include<algorithm>
 #include<stdlib.h>
