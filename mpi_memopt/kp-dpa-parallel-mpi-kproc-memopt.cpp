@@ -1,3 +1,4 @@
+///Dynamic programming algorithm for Knapsack Problem
 #include<iostream>
 #include<algorithm>
 #include<stdlib.h>
@@ -12,7 +13,7 @@
 using namespace std;
 
 class KnapSolver {
-    int *a, *p, *w, *x, C, N;
+    int *a, *p, *w, *x, *buff_s1, *buff_s2, *buff_r, C, N;
 public:
     void read(int rank, char* file_name);
     void solve();
@@ -54,7 +55,7 @@ void KnapSolver::read(int rank, char* file_name) {
 }
 
 void KnapSolver::solve() { 
-    int i, j, pr1, pr2, ps1, ps2, size, rank, m, cnt_r1, cnt_r2, cnt_s1, cnt_s2;
+    int i, j, pr1, pr2, ps1, ps2, size, rank, m, cnt_r1, cnt_r2 = 0, cnt_rAll, cnt_s1, cnt_s2, k, l=0;
     double start = 0, end = 0, startBT = 0, endBT = 0;
     x = new (nothrow) int [N+2];
     if (x == nullptr)cout << "Error: memory could not be allocated for x.";
@@ -63,27 +64,37 @@ void KnapSolver::solve() {
     m = ceil((double) (C + 1) / (double) size);
     int nsize = m * size;
 //    std::cout << " m = " << m << ", nsize = " << nsize << "C + 1 =" << C + 1 << "\n";
-    a = new (nothrow) int [N * nsize];
+    a = new (nothrow) int [N * m];
     if (a == nullptr)
         cout << "Error: memory could not be allocated for a.";
+    buff_s1 = new (nothrow) int [m];
+    if (buff_s1 == nullptr)
+        cout << "Error: memory could not be allocated for buff_s1.";
+    buff_s2 = new (nothrow) int [m];
+    if (buff_s2 == nullptr)
+        cout << "Error: memory could not be allocated for buff_s2.";
+    buff_r = new (nothrow) int [m];
+    if (buff_r == nullptr)
+        cout << "Error: memory could not be allocated for buff_r.";
     start = MPI_Wtime();
     for (i = 0; i < N; i++) {
          //cout<<"\nHello from rank "<< rank <<" of size "<< size <<".\n";
         if (i != 0 && rank != 0) {
-            const int pbeg = m * rank - w[i];
-            const int pend = m * rank + m - 1 - w[i];
+            const int pbeg = m * rank - w[i]; ///Finding the beginning point of receiving process. 
+            const int pend = m * rank + m - 1 - w[i];  ///Finding the ending point of receiving process.
             pr1 = floor((double) (pbeg) / (double) m);
             pr2 = floor((double) (pend) / (double) m);
             if (pr1 >= 0) {
                 cnt_r1 = (m * pr1 + (m - 1))- pbeg + 1;
-                MPI_Recv(&a[(i - 1) * nsize + pbeg], cnt_r1, MPI_INT, pr1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                MPI_Recv(&buff_r, cnt_r1, MPI_INT, pr1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             }
             if (pr1 != pr2 && pr2 >= 0 && pr2 < rank) {
                 cnt_r2 = pend -(m * pr2) + 1;
-                MPI_Recv(&a[(i - 1) * nsize + m * pr2], cnt_r2, MPI_INT, pr2, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                MPI_Recv(&buff_r[cnt_r1], cnt_r2, MPI_INT, pr2, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             }
+            cnt_rAll = cnt_r1 + cnt_r2;
         }
-        for (j = rank * m; j < std::min((rank * m) + m, C + 1); j++) {
+        for (j = 0; j < m; j++) {
             if (j < w[i]) {
                 if (j == 0 || i == 0)
                     a[i * nsize + j] = 0;
@@ -107,12 +118,21 @@ void KnapSolver::solve() {
             ps2 = floor((double)pend / (double)m);
             if (ps1 < size && ps1 > rank) {
                 cnt_s1 = (m * ps1 + (m - 1)) - pbeg + 1;
-                MPI_Send(&a[i * nsize + (m * rank)], cnt_s1, MPI_INT, ps1, 1, MPI_COMM_WORLD);
+                for(k=0; k<cnt_s1; k++){
+                    buff_s1[k] = a[i * m + l];
+                    l++;
+                }
+                MPI_Send(&buff_s1, cnt_s1, MPI_INT, ps1, 1, MPI_COMM_WORLD);
                 //cout<<"\nSending "<<cnt_s1<< " size, starting from " << a[i * (C+1) + (m*rank)]<<" to p" << ps1 << " from p"<<rank<<" of "<<i+1<<"th object. (ps1)\n";
             }
             if (ps1 != ps2 && ps2 < size && ps2 > rank) {
                 cnt_s2 = pend - m * ps2 + 1;
-                MPI_Send(&a[i * nsize + m * ps2 - w[i + 1]], cnt_s2, MPI_INT, ps2, 1, MPI_COMM_WORLD);
+                l = m * ps2 - w[i + 1];
+                for(k=0; k<cnt_s2; k++){
+                    buff_s2[k] = a[i * m + l];
+                    l++;
+                }
+                MPI_Send(&buff_s2, cnt_s2, MPI_INT, ps2, 1, MPI_COMM_WORLD);
                 //cout<<"\nSending "<<cnt_s2<< " size, starting from "<<a[i * (C+1) + (m*rank+(m-1)-cnt_s2+1)]<<" to p" << ps2 << " from p"<<rank<<" of "<<i+1<<"th object. (ps2)\n";
             }
         }
