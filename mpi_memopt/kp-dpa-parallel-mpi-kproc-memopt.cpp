@@ -55,7 +55,7 @@ void KnapSolver::read(int rank, char* file_name) {
 }
 
 void KnapSolver::solve() { 
-    int i, j, pr1, pr2, ps1, ps2, size, rank, m, cnt_r1, cnt_r2 = 0, cnt_rAll, cnt_s1, cnt_s2, k, l=0;
+    int i, j, pr1, pr2, ps1, ps2, size, rank, m, cnt_r1 = 0, cnt_r2 = 0, cnt_rAll, cnt_s1, cnt_s2, z, l;
     double start = 0, end = 0, startBT = 0, endBT = 0;
     x = new (nothrow) int [N+2];
     if (x == nullptr)cout << "Error: memory could not be allocated for x.";
@@ -93,20 +93,24 @@ void KnapSolver::solve() {
                 MPI_Recv(&buff_r[cnt_r1], cnt_r2, MPI_INT, pr2, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             }
             cnt_rAll = cnt_r1 + cnt_r2;
+            cnt_r1 = cnt_r2 = 0;
         }
         for (j = 0; j < m; j++) {
-            if (j < w[i]) {
-                if (j == 0 || i == 0)
-                    a[i * nsize + j] = 0;
+            if ((j + (m*rank)) < w[i]) {
+                if ((j + (m*rank)) == 0 || i == 0)
+                    a[i * m + j] = 0;
                 else
-                    a[i * nsize + j] = a[(i - 1) * nsize + j];
+                    a[i * m + j] = a[(i - 1) * m + j];
             }
-            if (j >= w[i]) {
+            if ((j + (m*rank)) >= w[i]) {
                 if (i == 0)
-                    a[i * nsize + j] = p[i];
+                    a[i * m + j] = p[i];
                 else {
-                    int k = j - w[i];
-                    a[i * nsize + j] = max(a[(i - 1) * nsize + j], a[(i - 1) * nsize + k] + p[i]);
+                    int q = (j + (m*rank)) - w[i];
+                    if(cnt_rAll > 0 && j <= cnt_rAll)
+                        a[i * m + j] = max(a[(i - 1) * m + j], buff_r[j] + p[i]);
+                    else
+                        a[i * m + j] = max(a[(i - 1) * m + j], a[(i - 1) * m + q] + p[i]);
                 }
             }
             //if (i == N - 1 && j == C)cout << "\nThe optimal value = " << a[i * nsize + j] << ".\n";
@@ -116,10 +120,11 @@ void KnapSolver::solve() {
             const int pend = m * rank + m - 1 + w[i + 1];
             ps1 = floor((double)pbeg / (double)m);
             ps2 = floor((double)pend / (double)m);
+            l=0;
             if (ps1 < size && ps1 > rank) {
                 cnt_s1 = (m * ps1 + (m - 1)) - pbeg + 1;
-                for(k=0; k<cnt_s1; k++){
-                    buff_s1[k] = a[i * m + l];
+                for(z=0; z<cnt_s1; z++){
+                    buff_s1[z] = a[i * m + l];
                     l++;
                 }
                 MPI_Send(&buff_s1, cnt_s1, MPI_INT, ps1, 1, MPI_COMM_WORLD);
@@ -128,8 +133,8 @@ void KnapSolver::solve() {
             if (ps1 != ps2 && ps2 < size && ps2 > rank) {
                 cnt_s2 = pend - m * ps2 + 1;
                 l = m * ps2 - w[i + 1];
-                for(k=0; k<cnt_s2; k++){
-                    buff_s2[k] = a[i * m + l];
+                for(z=0; z<cnt_s2; z++){
+                    buff_s2[z] = a[i * m + l];
                     l++;
                 }
                 MPI_Send(&buff_s2, cnt_s2, MPI_INT, ps2, 1, MPI_COMM_WORLD);
@@ -166,7 +171,7 @@ void KnapSolver::solve() {
     {
         if(i == 0)
         {
-            if (a[i * (C+1) + k] == 0)
+            if (a[i * m + (k - (rank * m))] == 0)
             {
                 x[i] = 0;
                 i--;
@@ -179,7 +184,7 @@ void KnapSolver::solve() {
                 //cout<<"\nProcess "<<rank<<" is adding "<<x[i+1]<<" to the "<<i+1<<"th place and next k="<<x[N]<<" and i="<<x[N+1]<<".\n";
             }
         }
-        else if (a[i * (C+1) + k] != a[(i-1) * (C+1) + k])
+        else if (a[i * m + (k - (rank * m))] != a[(i-1) * m + (k - (rank * m))])
         {
             x[i] = 1;
             k = k - w[i];
