@@ -98,7 +98,7 @@ void KnapSolver::solve() {
                     a[i * nsize + j] = max(a[(i - 1) * nsize + j], a[(i - 1) * nsize + k] + p[i]);
                 }
             }
-            //if (i == N - 1 && j == C)cout << "\nThe optimal value = " << a[i * nsize + j] << ".\n";
+            //if (i == N - 1 && j == C)cout << "\nThe optimal value(O) = " << a[i * nsize + j] << ".\n";
         }
         if (i != N - 1 && rank < size - 1) {
             const int pbeg = m * rank + w[i + 1];
