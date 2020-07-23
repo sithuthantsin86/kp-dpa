@@ -1,21 +1,27 @@
 import subprocess
 
-folder = '/home/sithuthantsin86/Dropbox/DSc/git/kp-dpa/inputs/'
+folder = '/home/sithuthantsin86/Dropbox/DSc/git/kp-dpa/inputs/NxC_test_MPI/'
 nexperiments = 20
 
 def run_serial():
-    result = subprocess.run(['./s.out', folder + 'NxC_test_MPI_12800_640000_001'], stdout=subprocess.PIPE, universal_newlines=True)
+    result = subprocess.run(['./s.out', folder + 'NxC_test_MPI_6400_320000_001'], stdout=subprocess.PIPE, universal_newlines=True)
     return result.stdout
 
 def run_parallel():
-    result = subprocess.run(['mpirun', '-np', '4', 'pk.out', folder + 'NxC_test_MPI_12800_640000_001'], stdout=subprocess.PIPE, universal_newlines=True)
+    result = subprocess.run(['mpirun', '-np', '4', 'pk.out', folder + 'NxC_test_MPI_6400_320000_001'], stdout=subprocess.PIPE, universal_newlines=True)
+    return result.stdout
+
+def run_parallel_mem_sav():
+    result = subprocess.run(['mpirun', '-np', '4', 'pkm.out', folder + 'NxC_test_MPI_6400_320000_001'], stdout=subprocess.PIPE, universal_newlines=True)
     return result.stdout
 
 res_serial = [run_serial() for i in range(1,nexperiments)]
 res_parallel = [run_parallel() for i in range(1,nexperiments)]
+res_parallel_mem_sav = [run_parallel_mem_sav() for i in range(1,nexperiments)]
 
 res_serial = [float(i.strip()) for i in res_serial]
 res_parallel = [float(i.strip()) for i in res_parallel]
+res_parallel_mem_sav = [float(i.strip()) for i in res_parallel_mem_sav]
 
 print("Serial:")
 print(res_serial)
@@ -24,3 +30,7 @@ print("Serial average = ", sum(res_serial)/nexperiments)
 print("\nParallel:")
 print(res_parallel)
 print("Parallel average = ", sum(res_parallel)/nexperiments)
+
+print("\nParallel with memory saving:")
+print(res_parallel_mem_sav)
+print("Parallel with memory saving average = ", sum(res_parallel_mem_sav)/nexperiments)
