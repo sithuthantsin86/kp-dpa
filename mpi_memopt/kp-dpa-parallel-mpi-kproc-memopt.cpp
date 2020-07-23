@@ -63,7 +63,7 @@ void KnapSolver::solve() {
     MPI_Comm_size(MPI_COMM_WORLD, &size); //get number of processes
     m = ceil((double) (C + 1) / (double) size);
     int nsize = m * size;
-//    std::cout << " m = " << m << ", nsize = " << nsize << "C + 1 =" << C + 1 << "\n";
+    //std::cout << " m = " << m << ", nsize = " << nsize << ", C + 1 =" << C + 1 << "\n";
     a = new (nothrow) int [N * m];
     if (a == nullptr)
         cout << "Error: memory could not be allocated for a.";
@@ -78,7 +78,7 @@ void KnapSolver::solve() {
         cout << "Error: memory could not be allocated for buff_r.";
     start = MPI_Wtime();
     for (i = 0; i < N; i++) {
-         //cout<<"\nHello from rank "<< rank <<" of size "<< size <<".\n";
+        //cout<<"\nHello from rank "<< rank <<" of size "<< size <<".\n";
         if (i != 0 && rank != 0) {
             const int pbeg = m * rank - w[i]; ///Finding the beginning point of receiving process. 
             const int pend = m * rank + m - 1 - w[i];  ///Finding the ending point of receiving process.
@@ -86,14 +86,17 @@ void KnapSolver::solve() {
             pr2 = floor((double) (pend) / (double) m);
             if (pr1 >= 0) {
                 cnt_r1 = (m * pr1 + (m - 1))- pbeg + 1;
-                MPI_Recv(&buff_r, cnt_r1, MPI_INT, pr1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                MPI_Recv(&buff_r[0], cnt_r1, MPI_INT, pr1, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                cout<<"\nReceiving "<<cnt_r1<< " size, starting from " << buff_r[0]<<" to p" << rank << " from p"<<pr1<<" for "<<i+1<<"th object. (pr1)\n";
             }
             if (pr1 != pr2 && pr2 >= 0 && pr2 < rank) {
                 cnt_r2 = pend -(m * pr2) + 1;
                 MPI_Recv(&buff_r[cnt_r1], cnt_r2, MPI_INT, pr2, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                cout<<"\nReceiving "<<cnt_r2<< " size, starting from " << buff_r[cnt_r1]<<" to p" << rank << " from p"<<pr2<<" for "<<i+1<<"th object. (pr2)\n";
             }
             cnt_rAll = cnt_r1 + cnt_r2;
             cnt_r1 = cnt_r2 = 0;
+            //cout<<"I'm rank "<<rank<<" in i = "<<i<<" and I'm revieving "<<cnt_rAll<<" size.\n";
         }
         for (j = 0; j < m; j++) {
             if ((j + (m*rank)) < w[i]) {
@@ -106,20 +109,24 @@ void KnapSolver::solve() {
                 if (i == 0)
                     a[i * m + j] = p[i];
                 else {
-                    int q = (j + (m*rank)) - w[i];
-                    if(cnt_rAll > 0 && j <= cnt_rAll)
+                    int q = (j + (m*rank)) - w[i] - (m*rank); //4
+                    if(cnt_rAll > 0 && j < cnt_rAll){
                         a[i * m + j] = max(a[(i - 1) * m + j], buff_r[j] + p[i]);
-                    else
+                    }
+                    else{
                         a[i * m + j] = max(a[(i - 1) * m + j], a[(i - 1) * m + q] + p[i]);
+                        cout<<"\n\n!Work at rank = "<<rank<<", i = "<<i<<", j = "<<j<<", ["<<a[(i - 1) * m + j]<<" or "<<a[(i - 1) * m + q]<<"+"<<p[i]<<"].\n\n";
+                    }
+
                 }
             }
-            //if (i == N - 1 && j == C)cout << "\nThe optimal value = " << a[i * nsize + j] << ".\n";
+            if (rank == m-1 && i == N - 1 && j == m-1)cout << "\n\nThe optimal value = " << a[5 * m + 2] << ".\n\n";
         }
         if (i != N - 1 && rank < size - 1) {
-            const int pbeg = m * rank + w[i + 1];
-            const int pend = m * rank + m - 1 + w[i + 1];
-            ps1 = floor((double)pbeg / (double)m);
-            ps2 = floor((double)pend / (double)m);
+            const int pbeg = m * rank + w[i + 1]; // 9
+            const int pend = m * rank + m - 1 + w[i + 1]; //12
+            ps1 = floor((double)pbeg / (double)m);  //2
+            ps2 = floor((double)pend / (double)m);  //3
             l=0;
             if (ps1 < size && ps1 > rank) {
                 cnt_s1 = (m * ps1 + (m - 1)) - pbeg + 1;
@@ -127,18 +134,19 @@ void KnapSolver::solve() {
                     buff_s1[z] = a[i * m + l];
                     l++;
                 }
-                MPI_Send(&buff_s1, cnt_s1, MPI_INT, ps1, 1, MPI_COMM_WORLD);
-                //cout<<"\nSending "<<cnt_s1<< " size, starting from " << a[i * (C+1) + (m*rank)]<<" to p" << ps1 << " from p"<<rank<<" of "<<i+1<<"th object. (ps1)\n";
+                MPI_Send(&buff_s1[0], cnt_s1, MPI_INT, ps1, 1, MPI_COMM_WORLD);
+                cout<<"\nSending "<<cnt_s1<< " size, starting from " << a[i * m + 0]<<" to p" << ps1 << " from p"<<rank<<" of "<<i+1<<"th object. (ps1)\n";
             }
             if (ps1 != ps2 && ps2 < size && ps2 > rank) {
-                cnt_s2 = pend - m * ps2 + 1;
-                l = m * ps2 - w[i + 1];
+                cnt_s2 = pend - m * ps2 + 1;  //1
+                l = m * ps2 - w[i + 1] - (m*rank); //3
+                cout<<"\n\n*****rank = "<<rank<<"*****i = "<<i<<"*****"<<a[i * m + 2]<<"*****\n\n";
                 for(z=0; z<cnt_s2; z++){
                     buff_s2[z] = a[i * m + l];
                     l++;
                 }
-                MPI_Send(&buff_s2, cnt_s2, MPI_INT, ps2, 1, MPI_COMM_WORLD);
-                //cout<<"\nSending "<<cnt_s2<< " size, starting from "<<a[i * (C+1) + (m*rank+(m-1)-cnt_s2+1)]<<" to p" << ps2 << " from p"<<rank<<" of "<<i+1<<"th object. (ps2)\n";
+                MPI_Send(&buff_s2[0], cnt_s2, MPI_INT, ps2, 1, MPI_COMM_WORLD);
+                cout<<"\nSending "<<cnt_s2<< " size, starting from "<<a[i * m + (m * ps2 - w[i + 1] - (m*rank))]<<" to p" << ps2 << " from p"<<rank<<" of "<<i+1<<"th object. (ps2)\n";
             }
         }
     }
