@@ -115,7 +115,7 @@ void KnapSolver::solve() {
                     //cout<<"\n\n!Work at rank = "<<rank<<", i = "<<i<<", j = "<<j<<", [ i==0 and fill p[i] = "<<p[i]<<"].\n\n";
                 }
                 else {
-                    int q = (j + (m*rank)) - w[i] - (m*rank); //4
+                    int q = j - w[i];
                     if(cnt_rAll > 0 && v < cnt_rAll){
                         a[i * m + j] = max(a[(i - 1) * m + j], buff_r[v] + p[i]);
                         v++;
@@ -128,7 +128,7 @@ void KnapSolver::solve() {
 
                 }
             }
-           //if (rank == size-1 && i == N - 1 && (j + (m*rank)) == C)cout << "\n\nThe optimal value = " << a[i * m + j] << ".\n\n";
+           if (rank == size-1 && i == N - 1 && (j + (m*rank)) == C)cout << "\n\nThe optimal value = " << a[i * m + j] << ".\n\n";
         }
         v=0;
         if (i != N - 1 && rank < size - 1) {
