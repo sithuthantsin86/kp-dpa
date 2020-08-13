@@ -94,7 +94,7 @@ void KnapSolver::solve() {
                 MPI_Recv(&buff_r[cnt_r1], cnt_r2, MPI_INT, pr2, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                 //cout<<"\nReceiving "<<cnt_r2<< " size, starting from " << buff_r[cnt_r1]<<" to p" << rank << " from p"<<pr2<<" for "<<i+1<<"th object. (pr2)\n";
             }
-            cnt_rAll = cnt_r1 + cnt_r2;
+            //cnt_rAll = cnt_r1 + cnt_r2;
             cnt_r1 = cnt_r2 = 0;
             //cout<<"I'm rank "<<rank<<" in i = "<<i<<" and I'm revieving "<<cnt_rAll<<" size.\n";
         }
@@ -116,7 +116,8 @@ void KnapSolver::solve() {
                 }
                 else {
                     int q = j - w[i];
-                    if(cnt_rAll > 0 && v < cnt_rAll){
+                    //if(cnt_rAll > 0 && v < cnt_rAll){
+                    if(q<0){
                         a[i * m + j] = max(a[(i - 1) * m + j], buff_r[v] + p[i]);
                         v++;
                         //cout<<"\n\n!Work at rank = "<<rank<<", i = "<<i<<", j = "<<j<<", ["<<a[(i - 1) * m + j]<<" or "<<buff_r[j]<<"+"<<p[i]<<"].\n\n";
@@ -128,7 +129,7 @@ void KnapSolver::solve() {
 
                 }
             }
-           if (rank == size-1 && i == N - 1 && (j + (m*rank)) == C)cout << "\n\nThe optimal value = " << a[i * m + j] << ".\n\n";
+           //if (rank == size-1 && i == N - 1 && (j + (m*rank)) == C)cout << "\n\nThe optimal value = " << a[i * m + j] << ".\n\n";
         }
         v=0;
         if (i != N - 1 && rank < size - 1) {
